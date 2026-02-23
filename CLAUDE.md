@@ -16,7 +16,7 @@ It is built as a monorepo with three npm workspaces: `backend/`, `frontend/`, an
 
 - Monorepo with npm workspaces: /backend, /frontend, /e2e
 - **Backend**: NestJS with one module per domain (auth, users, files, tags, storage)
-- **Frontend**: React + Vite + TypeScript, no UI library. Entry point is `src/main.tsx`.
+- **Frontend**: React + Vite + TypeScript, Chakra UI library. Entry point is `src/main.tsx`.
 - **E2E**: Playwright tests in the `e2e/` workspace.
 - All HTTP calls go through frontend/src/api/client.ts — never call fetch directly in components
 - Storage is abstracted in storage.service.ts — never write to disk outside of it

@@ -58,8 +58,5 @@
     "*.{js,mjs,json,md}": [
       "prettier --write"
     ]
-  },
-  "dependencies": {
-    "@nestjs/cli": "^11.0.16"
   }
 }
