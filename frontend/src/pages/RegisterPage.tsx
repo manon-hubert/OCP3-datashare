@@ -4,24 +4,9 @@ import { Link } from 'react-router-dom';
 function RegisterPage() {
   return (
     <Flex as="main" flex="1" align="center" justify="center" px="4" width="100%">
-      <Box
-        as="form"
-        bg="white"
-        borderRadius="16px"
-        p="6"
-        width="100%"
-        maxW="640px"
-        boxShadow="0px 0px 12px rgba(0, 0, 0, 0.25)"
-      >
+      <Box as="form" layerStyle="card" width="100%" maxW="640px">
         <Stack gap="6" height="100%">
-          <Heading
-            as="h2"
-            fontSize="28px"
-            fontWeight="700"
-            textAlign="center"
-            lineHeight="40px"
-            m="0"
-          >
+          <Heading as="h2" size="h2" textAlign="center" m="0">
             Créer un compte
           </Heading>
           <Stack gap="4" flex="1">

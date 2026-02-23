@@ -78,6 +78,17 @@ const fieldSlotRecipe = defineSlotRecipe({
   },
 });
 
+const headingRecipe = defineRecipe({
+  base: { color: 'black' },
+  variants: {
+    size: {
+      h2: { fontSize: '28px', fontWeight: '700', lineHeight: '40px' },
+      xl: { fontSize: '30px', fontWeight: '300', lineHeight: '40px' },
+      h1: { fontSize: '32px', fontWeight: '700', lineHeight: '40px' },
+    },
+  },
+});
+
 const inputRecipe = defineRecipe({
   base: {
     fontFamily: 'DM Sans Variable',
@@ -115,7 +126,11 @@ const config = defineConfig({
           orangeBorder: { value: 'rgb(205, 94, 20, 0.5)' },
           darkBg: { value: '#2C2C2C' },
           darkText: { value: '#F3EEEA' },
-          cloudUpload: { value: '#FFEEEC' },
+        },
+        cloudUploadButton: {
+          ring: { value: 'rgba(47, 25, 13, 0.15)' },
+          inner: { value: '#100218' },
+          icon: { value: '#FFEEEC' },
         },
         form: {
           darkText: { value: '#1E1E1E' },
@@ -128,11 +143,19 @@ const config = defineConfig({
         text: { value: 'Inter Variable, sans-serif' },
       },
     },
+    layerStyles: {
+      card: {
+        value: {
+          background: 'white',
+          borderRadius: '16px',
+          padding: '6',
+          boxShadow: '0px 0px 12px rgba(0, 0, 0, 0.25)',
+        },
+      },
+    },
     recipes: {
       button: buttonRecipe,
-      heading: defineRecipe({
-        base: { color: 'black' },
-      }),
+      heading: headingRecipe,
       input: inputRecipe,
     },
     slotRecipes: {
