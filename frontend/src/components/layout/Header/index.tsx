@@ -1,4 +1,5 @@
 import { Button, Flex, Heading } from '@chakra-ui/react';
+import { Link } from 'react-router-dom';
 
 function Header() {
   return (
@@ -6,8 +7,8 @@ function Header() {
       <Heading as="h1" fontSize="2rem" fontWeight="bold">
         Datashare
       </Heading>
-      <Button href="/login" variant="solid" size="md">
-        Se connecter
+      <Button asChild variant="solid" size="md">
+        <Link to="/login">Se connecter</Link>
       </Button>
     </Flex>
   );
