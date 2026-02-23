@@ -115,6 +115,7 @@ const config = defineConfig({
           orangeBorder: { value: 'rgb(205, 94, 20, 0.5)' },
           darkBg: { value: '#2C2C2C' },
           darkText: { value: '#F3EEEA' },
+          cloudUpload: { value: '#FFEEEC' },
         },
         form: {
           darkText: { value: '#1E1E1E' },
