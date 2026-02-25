@@ -9,6 +9,10 @@
     "e2e"
   ],
   "scripts": {
+    "db:start": "docker-compose up -d",
+    "db:stop": "docker-compose down",
+    "db:reset": "docker-compose down -v && docker-compose up -d",
+    "db:logs": "docker-compose logs -f postgres",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "npm run start:dev --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
@@ -20,6 +24,7 @@
     "test": "npm run test --workspace=backend && npm run test --workspace=frontend",
     "test:e2e": "npm run test --workspace=e2e",
     "test:e2e:ui": "npm run test:ui --workspace=e2e",
+    "generate:api": "dotenv -e frontend/.env -- sh -c 'openapi-typescript $VITE_API_URL/api-json -o frontend/src/api/schema.d.ts'",
     "prepare": "husky"
   },
   "repository": {
@@ -39,6 +44,7 @@
     "@commitlint/config-conventional": "^20.4.1",
     "@eslint/js": "^9.39.1",
     "concurrently": "^8.0.0",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-react": "^7.37.0",
@@ -47,6 +53,7 @@
     "globals": "^16.5.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
+    "openapi-typescript": "^7.13.0",
     "prettier": "^3.4.2",
     "typescript-eslint": "^8.14.0"
   },
@@ -58,5 +65,8 @@
     "*.{js,mjs,json,md}": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "@nestjs/platform-express": "^11.1.14"
   }
 }

@@ -66,7 +66,7 @@ const buttonRecipe = defineRecipe({
 });
 
 const fieldSlotRecipe = defineSlotRecipe({
-  slots: ['label'],
+  slots: ['label', 'errorText'],
   base: {
     label: {
       color: '{colors.form.darkText}',
@@ -75,6 +75,20 @@ const fieldSlotRecipe = defineSlotRecipe({
       fontSize: '16px',
       lineHeight: '24px',
     },
+    errorText: {
+      color: '{colors.form.errorText}',
+      fontFamily: 'DM Sans Variable',
+      fontWeight: 'normal',
+      fontSize: '14px',
+      lineHeight: '16px',
+    },
+    // errorText: {
+    //   color: '{colors.form.errorText}',
+    //   fontFamily: 'Inter Variable',
+    //   fontWeight: '400',
+    //   fontSize: '16px',
+    //   lineHeight: '24px',
+    // },
   },
 });
 
@@ -113,6 +127,54 @@ const inputRecipe = defineRecipe({
     },
   },
 });
+const alertSlotRecipe = defineSlotRecipe({
+  slots: ['root', 'indicator', 'title', 'description', 'content'],
+  base: {
+    title: {
+      fontFamily: 'DM Sans Variable',
+      fontSize: '14px',
+      fontWeight: '400',
+    },
+  },
+  compoundVariants: [
+    {
+      status: 'success',
+      css: {
+        root: { bg: '{colors.alert.success.bg}' },
+        indicator: { color: '{colors.alert.success.text}' },
+        title: { color: '{colors.alert.success.text}' },
+        description: { color: '{colors.alert.success.text}' },
+      },
+    },
+    {
+      status: 'error',
+      css: {
+        root: { bg: '{colors.alert.error.bg}' },
+        indicator: { color: '{colors.alert.error.text}' },
+        title: { color: '{colors.alert.error.text}' },
+        description: { color: '{colors.alert.error.text}' },
+      },
+    },
+    {
+      status: 'info',
+      css: {
+        root: { bg: '{colors.alert.info.bg}' },
+        indicator: { color: '{colors.alert.info.text}' },
+        title: { color: '{colors.alert.info.text}' },
+        description: { color: '{colors.alert.info.text}' },
+      },
+    },
+    {
+      status: 'warning',
+      css: {
+        root: { bg: '{colors.alert.warning.bg}' },
+        indicator: { color: '{colors.alert.warning.text}' },
+        title: { color: '{colors.alert.warning.text}' },
+        description: { color: '{colors.alert.warning.text}' },
+      },
+    },
+  ],
+});
 
 const config = defineConfig({
   theme: {
@@ -136,6 +198,25 @@ const config = defineConfig({
           darkText: { value: '#1E1E1E' },
           lightText: { value: '#B3B3B3' },
           lightBorder: { value: '#D9D9D9' },
+          errorText: { value: '#F14343' },
+        },
+        alert: {
+          success: {
+            bg: { value: '#E8F5E9' },
+            text: { value: '#2E7D32' },
+          },
+          error: {
+            bg: { value: '#FFE2E2' },
+            text: { value: '#9C3333' },
+          },
+          info: {
+            bg: { value: '#E2ECFF' },
+            text: { value: '#2A3F72' },
+          },
+          warning: {
+            bg: { value: '#FFF5ED' },
+            text: { value: '#AA642B' },
+          },
         },
       },
       fonts: {
@@ -160,6 +241,7 @@ const config = defineConfig({
     },
     slotRecipes: {
       field: fieldSlotRecipe,
+      alert: alertSlotRecipe,
     },
   },
 });
