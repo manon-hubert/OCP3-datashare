@@ -118,6 +118,9 @@ const inputRecipe = defineRecipe({
       fontSize: '16px',
       color: '{colors.form.lightText}',
     },
+    _autofill: {
+      transition: 'background-color 0s 600000s, color 0s 600000s',
+    },
   },
   variants: {
     variant: {
