@@ -98,11 +98,9 @@ function RegisterPage() {
           {submissionStatus === 'success' && (
             <Alert.Root status="success">
               <Alert.Indicator />
-              <Alert.Content>
-                <Alert.Title>
-                  Vous pouvez maintenant <Link to="/login">vous connecter</Link>.
-                </Alert.Title>
-              </Alert.Content>
+              <Alert.Title>
+                Vous pouvez maintenant <Link to="/login">vous connecter</Link>.
+              </Alert.Title>
             </Alert.Root>
           )}
           {submissionStatus === 'error' && (
