@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-  '/users': {
+  '/auth/register': {
     parameters: {
       query?: never;
       header?: never;
@@ -14,7 +14,24 @@ export interface paths {
     get?: never;
     put?: never;
     /** Register a new user */
-    post: operations['UsersController_create'];
+    post: operations['AuthController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/login': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Login a user */
+    post: operations['AuthController_login'];
     delete?: never;
     options?: never;
     head?: never;
@@ -30,6 +47,11 @@ export interface components {
       email: string;
       password: string;
     };
+    LoginUserDto: {
+      /** @example user@example.com */
+      email: string;
+      password: string;
+    };
   };
   responses: never;
   parameters: never;
@@ -39,7 +61,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  UsersController_create: {
+  AuthController_create: {
     parameters: {
       query?: never;
       header?: never;
@@ -59,6 +81,38 @@ export interface operations {
       };
       /** @description Validation error */
       400: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+    };
+  };
+  AuthController_login: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LoginUserDto'];
+      };
+    };
+    responses: {
+      /** @description Login successful */
+      200: {
+        headers: Record<string, unknown>;
+        content: {
+          'application/json': { access_token: string };
+        };
+      };
+      /** @description Validation error */
+      400: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+      /** @description Invalid credentials */
+      401: {
         headers: Record<string, unknown>;
         content?: never;
       };
