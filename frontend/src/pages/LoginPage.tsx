@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { login as loginUser } from '../api/users.ts';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LoginFormData {
   email: string;
@@ -11,6 +12,7 @@ interface LoginFormData {
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [submissionStatus, setSubmissionStatus] = useState<'success' | 'error' | null>(null);
 
   const {
@@ -22,7 +24,7 @@ function LoginPage() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       const token = await loginUser(data.email, data.password);
-      localStorage.setItem('access_token', token);
+      login(token);
       void navigate('/');
     } catch {
       setSubmissionStatus('error');

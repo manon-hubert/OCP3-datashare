@@ -3,18 +3,21 @@ import Layout from './components/layout/Layout';
 import LoginPage from './pages/LoginPage.tsx';
 import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage.tsx';
+import { AuthProvider } from './contexts/AuthContext';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/login" element={<LoginPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<LoginPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
