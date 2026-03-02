@@ -1,4 +1,4 @@
-import { Injectable, UnsupportedMediaTypeException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as crypto from 'node:crypto';
@@ -46,5 +46,38 @@ export class FilesService {
     }
 
     return fileEntity;
+  }
+
+  async getInfoByToken(
+    token: string,
+  ): Promise<Pick<FileEntity, 'originalName' | 'mimeType' | 'size' | 'createdAt'>> {
+    const file = await this.filesRepository.findOne({ where: { downloadToken: token } });
+    if (!file) {
+      throw new NotFoundException({
+        code: ErrorCode.FILE_NOT_FOUND,
+        message: ErrorMessage[ErrorCode.FILE_NOT_FOUND],
+      });
+    }
+    return {
+      originalName: file.originalName,
+      mimeType: file.mimeType,
+      size: file.size,
+      createdAt: file.createdAt,
+    };
+  }
+
+  async getBufferByToken(
+    token: string,
+  ): Promise<{ buffer: Buffer; originalName: string; mimeType: string }> {
+    const file = await this.filesRepository.findOne({ where: { downloadToken: token } });
+    if (!file) {
+      throw new NotFoundException({
+        code: ErrorCode.FILE_NOT_FOUND,
+        message: ErrorMessage[ErrorCode.FILE_NOT_FOUND],
+      });
+    }
+    const storagePath = file.userId ? `users/${file.userId}/${file.id}` : `anonymous/${file.id}`;
+    const buffer = await this.storageService.read(storagePath);
+    return { buffer, originalName: file.originalName, mimeType: file.mimeType };
   }
 }

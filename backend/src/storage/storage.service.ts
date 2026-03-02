@@ -17,6 +17,11 @@ export class StorageService {
     await fs.writeFile(fullPath, buffer);
   }
 
+  async read(filePath: string): Promise<Buffer> {
+    const fullPath = path.join(this.baseDir, filePath);
+    return fs.readFile(fullPath);
+  }
+
   async delete(filePath: string): Promise<void> {
     const fullPath = path.join(this.baseDir, filePath);
     await fs.unlink(fullPath);
