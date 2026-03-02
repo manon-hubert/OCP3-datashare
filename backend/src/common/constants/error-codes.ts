@@ -47,17 +47,17 @@ export const ErrorHttpStatus: Record<ErrorCode, number> = {
  * These can be overridden when throwing the error.
  */
 export const ErrorMessage: Record<ErrorCode, string> = {
-  [ErrorCode.AUTH_INVALID_CREDENTIALS]: 'Invalid email or password',
-  [ErrorCode.AUTH_TOKEN_EXPIRED]: 'Your session has expired. Please log in again.',
-  [ErrorCode.AUTH_UNAUTHORIZED]: 'You do not have permission to perform this action',
+  [ErrorCode.AUTH_INVALID_CREDENTIALS]: 'Email ou mot de passe invalide',
+  [ErrorCode.AUTH_TOKEN_EXPIRED]: 'Votre session a expiré. Veuillez vous reconnecter.',
+  [ErrorCode.AUTH_UNAUTHORIZED]: "Vous n'avez pas la permission d'effectuer cette action",
 
-  [ErrorCode.FILE_NOT_FOUND]: 'The requested file does not exist',
-  [ErrorCode.FILE_GONE]: 'This file has been deleted or has expired',
-  [ErrorCode.FILE_TOO_LARGE]: 'File size exceeds the maximum limit of 1 GB',
-  [ErrorCode.FILE_WRONG_PASSWORD]: 'Incorrect password',
-  [ErrorCode.FILE_TYPE_FORBIDDEN]: 'This file type is not allowed',
+  [ErrorCode.FILE_NOT_FOUND]: "Le fichier demandé n'existe pas",
+  [ErrorCode.FILE_GONE]: 'Ce fichier a été supprimé ou a expiré',
+  [ErrorCode.FILE_TOO_LARGE]: 'La taille du fichier dépasse la limite maximale de 1 Go',
+  [ErrorCode.FILE_WRONG_PASSWORD]: 'Mot de passe incorrect',
+  [ErrorCode.FILE_TYPE_FORBIDDEN]: "Ce type de fichier n'est pas autorisé",
 
-  [ErrorCode.VALIDATION_ERROR]: 'The request contains invalid data',
+  [ErrorCode.VALIDATION_ERROR]: 'La requête contient des données invalides',
 
-  [ErrorCode.SERVER_ERROR]: 'An unexpected error occurred. Please try again later.',
+  [ErrorCode.SERVER_ERROR]: 'Une erreur inattendue est survenue. Veuillez réessayer plus tard.',
 };

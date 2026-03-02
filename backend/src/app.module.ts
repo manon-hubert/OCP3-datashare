@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -20,9 +21,10 @@ import { AuthModule } from './auth/auth.module';
         FRONTEND_URL: Joi.string().default('http://localhost:5173'),
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRES_IN: Joi.string().default('15m'),
+        UPLOAD_PATH: Joi.string().default('./uploads'),
+        MAX_FILE_SIZE: Joi.number().default(1_000_000_000),
       }),
     }),
-    AuthModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -37,6 +39,8 @@ import { AuthModule } from './auth/auth.module';
       }),
       inject: [ConfigService],
     }),
+    AuthModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -33,3 +33,6 @@ playwright-report/
 .temp/
 .tmp/
 tmp/
+
+# Uploaded files
+backend/uploads/
