@@ -8,7 +8,7 @@ interface UploadSuccessCardProps {
 }
 
 const UploadSuccessCard = ({ uploadedFile }: UploadSuccessCardProps) => {
-  const shareUrl = `${import.meta.env.VITE_API_URL}/files/${uploadedFile.downloadToken}`;
+  const shareUrl = `${window.location.origin}/share/${uploadedFile.downloadToken}`;
 
   return (
     <Box layerStyle="card" width="100%" maxW="540px">

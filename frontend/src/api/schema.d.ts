@@ -47,7 +47,42 @@ export interface paths {
     };
     get?: never;
     put?: never;
+    /** Upload a file */
     post: operations['FilesController_upload'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/files/download/{token}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get file metadata by download token */
+    get: operations['FilesController_getInfo'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/files/download/{token}/content': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Download file by token */
+    get: operations['FilesController_download'];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -67,6 +102,15 @@ export interface components {
       /** @example user@example.com */
       email: string;
       password: string;
+    };
+    FileEntity: {
+      id: string;
+      originalName: string;
+      mimeType: string;
+      size: number;
+      downloadToken: string;
+      /** Format: date-time */
+      createdAt: string;
     };
   };
   responses: never;
@@ -134,9 +178,80 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          file: string;
+        };
+      };
+    };
+    responses: {
+      /** @description File uploaded successfully */
+      201: {
+        headers: Record<string, unknown>;
+        content: {
+          'application/json': components['schemas']['FileEntity'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+      /** @description File exceeds the size limit */
+      413: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+      /** @description File type not allowed */
+      415: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+    };
+  };
+  FilesController_getInfo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
     requestBody?: never;
     responses: {
-      201: {
+      /** @description File metadata */
+      200: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+      /** @description File not found */
+      404: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+    };
+  };
+  FilesController_download: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description File stream */
+      200: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+      /** @description File not found */
+      404: {
         headers: Record<string, unknown>;
         content?: never;
       };

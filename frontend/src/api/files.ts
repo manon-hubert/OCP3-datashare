@@ -1,14 +1,27 @@
 import { apiClient } from './client';
 import type { components } from './schema';
 
-export type UploadedFile = components['schemas']['UploadedFile'];
+export type UploadedFile = components['schemas']['FileEntity'];
+
+export interface FileInfo {
+  originalName: string;
+  mimeType: string;
+  size: number;
+  createdAt: string;
+}
+
+export async function getFileInfo(token: string): Promise<FileInfo> {
+  const response = await fetch(`${import.meta.env.VITE_API_URL as string}/files/download/${token}`);
+  if (!response.ok) throw new Error('FILE_NOT_FOUND');
+  return (await response.json()) as FileInfo;
+}
 
 export async function uploadFile(file: File): Promise<UploadedFile> {
   const { data, error } = await apiClient.POST('/files', {
-    body: { file },
-    bodySerializer(body) {
+    body: { file: file as unknown as string },
+    bodySerializer() {
       const form = new FormData();
-      form.append('file', body.file as Blob);
+      form.append('file', file);
       return form;
     },
   });

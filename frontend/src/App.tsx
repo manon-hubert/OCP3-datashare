@@ -3,6 +3,7 @@ import Layout from './components/layout/Layout';
 import LoginPage from './pages/LoginPage.tsx';
 import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage.tsx';
+import DownloadPage from './pages/DownloadPage.tsx';
 import { AuthProvider } from './contexts/AuthContext';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/share/:token" element={<DownloadPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

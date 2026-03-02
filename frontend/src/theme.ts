@@ -146,7 +146,7 @@ const alertSlotRecipe = defineSlotRecipe({
     {
       status: 'success',
       css: {
-        root: { bg: '{colors.alert.success.bg}', padding: '8px' },
+        root: { bg: '{colors.alert.success.bg}', padding: '8px', alignItems: 'center' },
         indicator: { color: '{colors.alert.success.text}' },
         title: { color: '{colors.alert.success.text}' },
         description: { color: '{colors.alert.success.text}' },
@@ -155,7 +155,7 @@ const alertSlotRecipe = defineSlotRecipe({
     {
       status: 'error',
       css: {
-        root: { bg: '{colors.alert.error.bg}', padding: '8px' },
+        root: { bg: '{colors.alert.error.bg}', padding: '8px', alignItems: 'center' },
         indicator: { color: '{colors.alert.error.text}' },
         title: { color: '{colors.alert.error.text}' },
         description: { color: '{colors.alert.error.text}' },
@@ -164,7 +164,7 @@ const alertSlotRecipe = defineSlotRecipe({
     {
       status: 'info',
       css: {
-        root: { bg: '{colors.alert.info.bg}', padding: '8px' },
+        root: { bg: '{colors.alert.info.bg}', padding: '8px', alignItems: 'center' },
         indicator: { color: '{colors.alert.info.text}' },
         title: { color: '{colors.alert.info.text}' },
         description: { color: '{colors.alert.info.text}' },
@@ -173,7 +173,7 @@ const alertSlotRecipe = defineSlotRecipe({
     {
       status: 'warning',
       css: {
-        root: { bg: '{colors.alert.warning.bg}', padding: '8px' },
+        root: { bg: '{colors.alert.warning.bg}', padding: '8px', alignItems: 'center' },
         indicator: { color: '{colors.alert.warning.text}' },
         title: { color: '{colors.alert.warning.text}' },
         description: { color: '{colors.alert.warning.text}' },
