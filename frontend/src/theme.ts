@@ -240,6 +240,24 @@ const config = defineConfig({
         },
       },
     },
+    textStyles: {
+      body: {
+        value: {
+          fontFamily: 'Inter Variable, sans-serif',
+          fontWeight: '400',
+          fontSize: '16px',
+          lineHeight: '24px',
+        },
+      },
+      caption: {
+        value: {
+          fontFamily: 'DM Sans Variable, sans-serif',
+          fontWeight: '400',
+          fontSize: '14px',
+          lineHeight: '16px',
+        },
+      },
+    },
     recipes: {
       button: buttonRecipe,
       heading: headingRecipe,
