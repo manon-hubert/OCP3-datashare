@@ -12,6 +12,13 @@ export function setUnauthorizedHandler(handler: () => void) {
 }
 
 apiClient.use({
+  async onRequest({ request }) {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      request.headers.set('Authorization', `Bearer ${token}`);
+    }
+    return request;
+  },
   async onResponse({ response, request }) {
     if (response.status === 401 && unauthorizedHandler && !request.url.endsWith('/auth/login')) {
       unauthorizedHandler();

@@ -2,12 +2,17 @@ import { type ChangeEvent, useRef, useState } from 'react';
 import { Flex, Heading, VStack } from '@chakra-ui/react';
 import CloudUploadButton from '../components/ui/CloudUploadButton';
 import UploadForm from '../components/ui/UploadForm';
+import UploadSuccessCard from '../components/ui/UploadSuccessCard';
+import { uploadFile, type UploadedFile } from '../api/files';
 
 const MAX_FILE_SIZE = Number(import.meta.env.VITE_MAX_FILE_SIZE);
 
 const HomePage = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileSizeError, setFileSizeError] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | undefined>();
+  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const openFilePicker = () => {
@@ -19,12 +24,57 @@ const HomePage = () => {
     if (file) {
       setSelectedFile(file);
       setFileSizeError(file.size > MAX_FILE_SIZE);
+      setUploadError(undefined);
+      setUploadedFile(null);
     }
     e.target.value = '';
   };
 
-  const handleUpload = (_fileName: string) => {
-    // TODO: wire to POST /files API
+  const handleUpload = async () => {
+    if (!selectedFile) return;
+    setIsUploading(true);
+    setUploadError(undefined);
+    try {
+      const result = await uploadFile(selectedFile);
+      setUploadedFile(result);
+      setSelectedFile(null);
+    } catch (err) {
+      const apiMessage =
+        typeof err === 'object' && err !== null
+          ? (err as { error?: { message?: string } }).error?.message
+          : undefined;
+      setUploadError(
+        apiMessage ?? 'Une erreur est survenue lors du téléversement. Veuillez réessayer.',
+      );
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const renderContent = () => {
+    if (uploadedFile) {
+      return <UploadSuccessCard uploadedFile={uploadedFile} />;
+    }
+    if (selectedFile) {
+      return (
+        <UploadForm
+          file={selectedFile}
+          fileSizeError={fileSizeError}
+          isUploading={isUploading}
+          uploadError={uploadError}
+          onChangeFile={openFilePicker}
+          onUpload={handleUpload}
+        />
+      );
+    }
+    return (
+      <VStack gap="4">
+        <Heading size="xl" textAlign="center" m="0">
+          Tu veux partager un fichier ?
+        </Heading>
+        <CloudUploadButton onClick={openFilePicker} />
+      </VStack>
+    );
   };
 
   return (
@@ -35,21 +85,7 @@ const HomePage = () => {
         style={{ display: 'none' }}
         onChange={handleFileChange}
       />
-      {selectedFile ? (
-        <UploadForm
-          file={selectedFile}
-          fileSizeError={fileSizeError}
-          onChangeFile={openFilePicker}
-          onUpload={handleUpload}
-        />
-      ) : (
-        <VStack gap="4">
-          <Heading size="xl" textAlign="center" m="0">
-            Tu veux partager un fichier ?
-          </Heading>
-          <CloudUploadButton onClick={openFilePicker} />
-        </VStack>
-      )}
+      {renderContent()}
     </Flex>
   );
 };

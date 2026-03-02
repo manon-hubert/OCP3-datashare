@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Heading, Stack, Text } from '@chakra-ui/react';
+import { Alert, Box, Button, Flex, Heading, Stack, Text } from '@chakra-ui/react';
 import { CloudUpload, FilePlus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
@@ -9,8 +9,10 @@ interface UploadFormData {
 interface UploadFormProps {
   file: File;
   fileSizeError?: boolean;
+  isUploading?: boolean;
+  uploadError?: string;
   onChangeFile: () => void;
-  onUpload: (fileName: string) => void;
+  onUpload: () => void;
 }
 
 export function formatFileSize(bytes: number): string {
@@ -23,13 +25,20 @@ export function formatFileSize(bytes: number): string {
 
 const maxFileSizeDisplay = formatFileSize(Number(import.meta.env.VITE_MAX_FILE_SIZE));
 
-const UploadForm = ({ file, fileSizeError, onChangeFile, onUpload }: UploadFormProps) => {
+const UploadForm = ({
+  file,
+  fileSizeError,
+  isUploading,
+  uploadError,
+  onChangeFile,
+  onUpload,
+}: UploadFormProps) => {
   const { handleSubmit } = useForm<UploadFormData>({
     defaultValues: { fileName: file.name },
   });
 
-  const onSubmit = handleSubmit(({ fileName }) => {
-    onUpload(fileName);
+  const onSubmit = handleSubmit(() => {
+    onUpload();
   });
 
   return (
@@ -91,7 +100,19 @@ const UploadForm = ({ file, fileSizeError, onChangeFile, onUpload }: UploadFormP
           )}
         </Stack>
 
-        <Button variant="surface" type="submit" disabled={fileSizeError}>
+        {uploadError && (
+          <Alert.Root status="error">
+            <Alert.Indicator />
+            <Alert.Title>{uploadError}</Alert.Title>
+          </Alert.Root>
+        )}
+
+        <Button
+          variant="surface"
+          type="submit"
+          disabled={fileSizeError || isUploading}
+          loading={isUploading}
+        >
           <CloudUpload />
           Téléverser
         </Button>
