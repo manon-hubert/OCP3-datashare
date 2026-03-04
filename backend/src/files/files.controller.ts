@@ -1,10 +1,13 @@
 import {
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
   Post,
+  Query,
+  Req,
   Res,
   UploadedFile,
   UseGuards,
@@ -19,6 +22,8 @@ import { FileEntity } from './entities/file.entity';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser, type JwtPayload } from '../common/decorators/current-user.decorator';
 import { FileSizePipe } from '../common/pipes/file-size.pipe';
+import { ListFilesQueryDto } from './dto/list-files-query.dto';
+import { FileOwnerGuard } from './guards/file-owner.guard';
 
 @ApiTags('files')
 @Controller('files')
@@ -44,6 +49,27 @@ export class FilesController {
   @ApiResponse({ status: 415, description: 'File type not allowed' })
   async upload(@CurrentUser() user: JwtPayload, @UploadedFile(FileSizePipe) file: any) {
     return this.filesService.upload(user.sub, file);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'List files for authenticated user' })
+  @ApiResponse({ status: 200, description: 'List of files' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async list(@CurrentUser() user: JwtPayload, @Query() query: ListFilesQueryDto) {
+    return this.filesService.listUserFiles(user.sub, query.filter!);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, FileOwnerGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a file' })
+  @ApiResponse({ status: 204, description: 'File deleted' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'File not found' })
+  async delete(@Req() req: { fileEntity: FileEntity }) {
+    await this.filesService.deleteFile(req.fileEntity);
   }
 
   @Get('download/:token')

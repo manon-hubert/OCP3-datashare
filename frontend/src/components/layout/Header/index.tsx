@@ -11,8 +11,8 @@ function Header() {
         <Link to="/">Datashare</Link>
       </Heading>
       {isAuthenticated ? (
-        <Button variant="solid" size="md">
-          Mon espace
+        <Button asChild variant="solid" size="md">
+          <Link to="/my-files">Mon espace</Link>
         </Button>
       ) : (
         <Button asChild variant="solid" size="md">

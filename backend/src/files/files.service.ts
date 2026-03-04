@@ -11,6 +11,9 @@ import { FileEntity } from './entities/file.entity';
 import { StorageService } from '../storage/storage.service';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime-types';
 import { ErrorCode, ErrorMessage } from '../common/constants/error-codes';
+import { FileFilter } from './dto/list-files-query.dto';
+
+const FILE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 @Injectable()
 export class FilesService {
@@ -69,6 +72,43 @@ export class FilesService {
       size: file.size,
       createdAt: file.createdAt,
     };
+  }
+
+  async listUserFiles(userId: number, filter: FileFilter) {
+    const cutoff = new Date(Date.now() - FILE_TTL_MS);
+
+    const qb = this.filesRepository
+      .createQueryBuilder('file')
+      .where('file.userId = :userId', { userId })
+      .orderBy('file.createdAt', 'DESC');
+
+    if (filter === FileFilter.ACTIVE) {
+      qb.andWhere('file.createdAt > :cutoff', { cutoff });
+    } else if (filter === FileFilter.EXPIRED) {
+      qb.andWhere('file.createdAt <= :cutoff', { cutoff });
+    }
+
+    const files = await qb.getMany();
+
+    return files.map((file) => ({
+      id: file.id,
+      originalName: file.originalName,
+      mimeType: file.mimeType,
+      size: file.size,
+      downloadToken: file.downloadToken,
+      createdAt: file.createdAt,
+      expiresAt: new Date(file.createdAt.getTime() + FILE_TTL_MS),
+    }));
+  }
+
+  async deleteFile(file: FileEntity): Promise<void> {
+    await this.filesRepository.delete(file.id);
+    const storagePath = file.userId ? `users/${file.userId}/${file.id}` : `anonymous/${file.id}`;
+    try {
+      await this.storageService.delete(storagePath);
+    } catch {
+      // Storage cleanup failure is non-critical after DB deletion
+    }
   }
 
   async getBufferByToken(

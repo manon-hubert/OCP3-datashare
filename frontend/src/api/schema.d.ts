@@ -45,11 +45,29 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /** List files for authenticated user */
+    get: operations['FilesController_list'];
     put?: never;
     /** Upload a file */
     post: operations['FilesController_upload'];
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/files/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete a file */
+    delete: operations['FilesController_delete'];
     options?: never;
     head?: never;
     patch?: never;
@@ -112,6 +130,17 @@ export interface components {
       /** Format: date-time */
       createdAt: string;
     };
+    FileListItem: {
+      id: string;
+      originalName: string;
+      mimeType: string;
+      size: number;
+      downloadToken: string;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      expiresAt: string;
+    };
   };
   responses: never;
   parameters: never;
@@ -162,7 +191,11 @@ export interface operations {
       /** @description Login successful */
       200: {
         headers: Record<string, unknown>;
-        content?: never;
+        content: {
+          'application/json': {
+            access_token: string;
+          };
+        };
       };
       /** @description Invalid credentials */
       401: {
@@ -206,6 +239,64 @@ export interface operations {
       };
       /** @description File type not allowed */
       415: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+    };
+  };
+  FilesController_list: {
+    parameters: {
+      query?: {
+        filter?: 'all' | 'active' | 'expired';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of files */
+      200: {
+        headers: Record<string, unknown>;
+        content: {
+          'application/json': components['schemas']['FileListItem'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+    };
+  };
+  FilesController_delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description File deleted */
+      204: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+      /** @description Forbidden */
+      403: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+      /** @description File not found */
+      404: {
         headers: Record<string, unknown>;
         content?: never;
       };

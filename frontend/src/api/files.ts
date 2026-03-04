@@ -2,6 +2,7 @@ import { apiClient } from './client';
 import type { components } from './schema';
 
 export type UploadedFile = components['schemas']['FileEntity'];
+export type FileListItem = components['schemas']['FileListItem'];
 
 export interface FileInfo {
   originalName: string;
@@ -28,4 +29,21 @@ export async function uploadFile(file: File): Promise<UploadedFile> {
 
   if (error) throw error;
   return data!;
+}
+
+export async function listFiles(
+  filter: 'all' | 'active' | 'expired' = 'all',
+): Promise<FileListItem[]> {
+  const { data, error } = await apiClient.GET('/files', {
+    params: { query: { filter } },
+  });
+  if (error) throw error;
+  return data!;
+}
+
+export async function deleteFile(id: string): Promise<void> {
+  const { error } = await apiClient.DELETE('/files/{id}', {
+    params: { path: { id } },
+  });
+  if (error) throw error;
 }

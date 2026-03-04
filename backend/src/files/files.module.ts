@@ -7,10 +7,11 @@ import { StorageModule } from '../storage/storage.module';
 import { AuthModule } from '../auth/auth.module';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { FileSizePipe } from '../common/pipes/file-size.pipe';
+import { FileOwnerGuard } from './guards/file-owner.guard';
 
 @Module({
   imports: [TypeOrmModule.forFeature([FileEntity]), StorageModule, AuthModule],
   controllers: [FilesController],
-  providers: [FilesService, JwtAuthGuard, FileSizePipe],
+  providers: [FilesService, JwtAuthGuard, FileSizePipe, FileOwnerGuard],
 })
 export class FilesModule {}
