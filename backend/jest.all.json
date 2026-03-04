@@ -1,0 +1,40 @@
+{
+  "projects": [
+    {
+      "displayName": "unit",
+      "moduleFileExtensions": ["js", "json", "ts"],
+      "rootDir": "src",
+      "testRegex": ".*\\.spec\\.ts$",
+      "transform": {
+        "^.+\\.(t|j)s$": [
+          "ts-jest",
+          {
+            "tsconfig": {
+              "module": "CommonJS",
+              "moduleResolution": "node",
+              "resolvePackageJsonExports": false
+            }
+          }
+        ]
+      },
+      "moduleNameMapper": {
+        "^file-type$": "<rootDir>/__mocks__/file-type.ts"
+      },
+      "testEnvironment": "node"
+    },
+    {
+      "displayName": "integration",
+      "moduleFileExtensions": ["js", "json", "ts"],
+      "rootDir": ".",
+      "roots": ["<rootDir>/test"],
+      "testRegex": ".integration-spec\\.ts$",
+      "transform": {
+        "^.+\\.(t|j)s$": "ts-jest"
+      },
+      "testEnvironment": "node"
+    }
+  ],
+  "collectCoverage": true,
+  "collectCoverageFrom": ["src/**/*.(t|j)s"],
+  "coverageDirectory": "coverage/all"
+}

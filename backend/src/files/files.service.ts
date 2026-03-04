@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
+import {
+  GoneException,
+  Injectable,
+  NotFoundException,
+  UnsupportedMediaTypeException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as crypto from 'node:crypto';
@@ -77,7 +82,18 @@ export class FilesService {
       });
     }
     const storagePath = file.userId ? `users/${file.userId}/${file.id}` : `anonymous/${file.id}`;
-    const buffer = await this.storageService.read(storagePath);
+    let buffer: Buffer;
+    try {
+      buffer = await this.storageService.read(storagePath);
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+        throw new GoneException({
+          code: ErrorCode.FILE_GONE,
+          message: ErrorMessage[ErrorCode.FILE_GONE],
+        });
+      }
+      throw err;
+    }
     return { buffer, originalName: file.originalName, mimeType: file.mimeType };
   }
 }
