@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Layout from './components/layout/Layout';
-import DashboardLayout from './components/layout/DashboardLayout';
+import Layout from './components/common/Layout.tsx';
+import DashboardLayout from './components/dashboard/DashboardLayout.tsx';
 import LoginPage from './pages/LoginPage.tsx';
 import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage.tsx';

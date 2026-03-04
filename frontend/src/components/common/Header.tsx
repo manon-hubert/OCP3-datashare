@@ -1,6 +1,6 @@
 import { Button, Flex, Heading } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext.tsx';
 
 function Header() {
   const { isAuthenticated } = useAuth();
