@@ -55,7 +55,7 @@ const buttonRecipe = defineRecipe({
       },
     },
     size: {
-      sm: { px: '12px', py: '8px', fontSize: '16px' },
+      sm: { px: '12px', py: '8px', fontSize: '16px', height: '32px' },
       md: { px: '12px', py: '12px', fontSize: '16px', height: '40px' },
     },
   },
@@ -208,6 +208,12 @@ const config = defineConfig({
           linkText: { value: '#D8640B' },
           urlBg: { value: 'rgba(255, 94, 0, 0.03)' },
           urlBorder: { value: 'rgba(215, 99, 11, 0.2)' },
+        },
+        dashboard: {
+          header: {
+            bg: { value: '#FFEEE3' },
+            border: { value: 'rgba(216, 97, 28, 0.29)' },
+          },
         },
         alert: {
           success: {
