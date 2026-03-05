@@ -1,16 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, Flex, Heading, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Heading, Tabs, Text } from '@chakra-ui/react';
 import { File as FileIcon, Lock, Trash2, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { listFiles, deleteFile, type FileListItem } from '../api/files';
 
 type Filter = 'all' | 'active' | 'expired';
-
-const FILTERS: { value: Filter; label: string }[] = [
-  { value: 'all', label: 'Tous' },
-  { value: 'active', label: 'Actifs' },
-  { value: 'expired', label: 'Expiré' },
-];
 
 function formatExpiry(expiresAt: string): { label: string; expired: boolean } {
   const today = new Date();
@@ -125,21 +119,18 @@ function MyFilesPage() {
         Mes fichiers
       </Heading>
 
-      <Flex gap="2" mb="6">
-        {FILTERS.map((f) => (
-          <Button
-            key={f.value}
-            onClick={() => setFilter(f.value)}
-            borderRadius="full"
-            size="sm"
-            px="5"
-            variant={filter === f.value ? 'surface' : 'outline'}
-            fontWeight={filter === f.value ? '600' : '400'}
-          >
-            {f.label}
-          </Button>
-        ))}
-      </Flex>
+      <Tabs.Root
+        value={filter}
+        onValueChange={(e: { value: string }) => setFilter(e.value as Filter)}
+        variant="enclosed"
+        mb="6"
+      >
+        <Tabs.List>
+          <Tabs.Trigger value="all">Tous</Tabs.Trigger>
+          <Tabs.Trigger value="active">Actifs</Tabs.Trigger>
+          <Tabs.Trigger value="expired">Expiré</Tabs.Trigger>
+        </Tabs.List>
+      </Tabs.Root>
 
       {error && (
         <Text color="red.500" mb="4" fontFamily="DM Sans Variable" fontSize="14px">

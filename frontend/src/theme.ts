@@ -130,6 +130,43 @@ const inputRecipe = defineRecipe({
     },
   },
 });
+const tabsSlotRecipe = defineSlotRecipe({
+  slots: ['root', 'list', 'trigger', 'content', 'indicator'],
+  variants: {
+    variant: {
+      enclosed: {
+        list: {
+          bg: '{colors.filterTabs.listBg}',
+          border: '1px solid',
+          borderColor: '{colors.filterTabs.listBorder}',
+          borderRadius: '24px',
+          padding: '0',
+          gap: '0',
+          height: '32px',
+          overflow: 'hidden',
+        },
+        trigger: {
+          px: '16px',
+          py: '8px',
+          fontSize: '16px',
+          fontWeight: '400',
+          fontFamily: 'DM Sans Variable',
+          color: '{colors.filterTabs.inactiveText}',
+          height: '100%',
+          borderRadius: '0',
+          border: 'none',
+          _selected: {
+            bg: '{colors.filterTabs.activeBg}',
+            color: '{colors.filterTabs.activeText}',
+            border: 'none',
+            boxShadow: 'none',
+          },
+        },
+      },
+    },
+  },
+});
+
 const alertSlotRecipe = defineSlotRecipe({
   slots: ['root', 'indicator', 'title', 'description', 'content'],
   base: {
@@ -199,6 +236,13 @@ const config = defineConfig({
           ring: { value: 'rgba(47, 25, 13, 0.15)' },
           inner: { value: '#100218' },
           icon: { value: '#FFEEEC' },
+        },
+        filterTabs: {
+          listBg: { value: 'rgba(255, 193, 145, 0.16)' },
+          listBorder: { value: 'rgba(215, 99, 11, 0.2)' },
+          activeBg: { value: '#E77A6E' },
+          activeText: { value: '#FFFFFF' },
+          inactiveText: { value: '#000000' },
         },
         form: {
           darkText: { value: '#1E1E1E' },
@@ -296,6 +340,7 @@ const config = defineConfig({
     slotRecipes: {
       field: fieldSlotRecipe,
       alert: alertSlotRecipe,
+      tabs: tabsSlotRecipe,
     },
   },
 });
