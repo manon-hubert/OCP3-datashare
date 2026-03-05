@@ -1,7 +1,6 @@
-import { Alert, Box, Button, Flex, Heading, Stack, Text } from '@chakra-ui/react';
+import { Alert, Box, Button, Flex, FormatByte, Heading, Stack, Text } from '@chakra-ui/react';
 import { CloudDownload, FileImage } from 'lucide-react';
 import type { FileInfo } from '../../api/files';
-import { formatFileSize } from './UploadForm';
 
 const FILE_LIFETIME_DAYS = 7;
 
@@ -78,7 +77,7 @@ const DownloadCard = ({ fileInfo, token }: DownloadCardProps) => {
                   {fileInfo.originalName}
                 </Text>
                 <Text textStyle="caption" color="form.darkText">
-                  {formatFileSize(fileInfo.size)}
+                  <FormatByte value={fileInfo.size} unitDisplay="short" unitSystem="decimal" />
                 </Text>
               </Flex>
             </Flex>

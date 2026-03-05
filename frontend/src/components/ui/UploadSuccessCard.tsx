@@ -1,7 +1,6 @@
-import { Box, Button, Flex, Heading, Stack, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, FormatByte, Heading, Stack, Text } from '@chakra-ui/react';
 import { Copy, FilePlus } from 'lucide-react';
 import type { UploadedFile } from '../../api/files';
-import { formatFileSize } from './UploadForm';
 
 interface UploadSuccessCardProps {
   uploadedFile: UploadedFile;
@@ -33,7 +32,7 @@ const UploadSuccessCard = ({ uploadedFile }: UploadSuccessCardProps) => {
               {uploadedFile.originalName}
             </Text>
             <Text textStyle="caption" color="form.darkText">
-              {formatFileSize(uploadedFile.size)}
+              <FormatByte value={uploadedFile.size} unitDisplay="short" unitSystem="decimal" />
             </Text>
           </Flex>
         </Flex>

@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Flex, Heading, Stack, Text } from '@chakra-ui/react';
+import { Alert, Box, Button, Flex, FormatByte, Heading, Stack, Text } from '@chakra-ui/react';
 import { CloudUpload, FilePlus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
@@ -14,16 +14,6 @@ interface UploadFormProps {
   onChangeFile: () => void;
   onUpload: () => void;
 }
-
-export function formatFileSize(bytes: number): string {
-  if (bytes < 1_000) return `${bytes} o`;
-  if (bytes < 1_000_000) return `${parseFloat((bytes / 1_000).toFixed(1)).toLocaleString('fr')} Ko`;
-  if (bytes < 1_000_000_000)
-    return `${parseFloat((bytes / 1_000_000).toFixed(1)).toLocaleString('fr')} Mo`;
-  return `${parseFloat((bytes / 1_000_000_000).toFixed(1)).toLocaleString('fr')} Go`;
-}
-
-const maxFileSizeDisplay = formatFileSize(Number(import.meta.env.VITE_MAX_FILE_SIZE));
 
 const UploadForm = ({
   file,
@@ -76,7 +66,7 @@ const UploadForm = ({
                   textStyle="caption"
                   color={fileSizeError ? 'form.errorText' : 'form.darkText'}
                 >
-                  {formatFileSize(file.size)}
+                  <FormatByte value={file.size} unitDisplay="short" unitSystem="decimal" />
                 </Text>
               </Flex>
             </Flex>
@@ -95,7 +85,12 @@ const UploadForm = ({
 
           {fileSizeError && (
             <Text textStyle="body" color="form.errorText">
-              La taille des fichiers est limitée à {maxFileSizeDisplay}
+              La taille des fichiers est limitée à{' '}
+              <FormatByte
+                value={Number(import.meta.env.VITE_MAX_FILE_SIZE)}
+                unitDisplay="short"
+                unitSystem="decimal"
+              />
             </Text>
           )}
         </Stack>
