@@ -56,6 +56,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/files/history': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List deleted/expired files for authenticated user */
+    get: operations['FilesController_history'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/files/{id}': {
     parameters: {
       query?: never;
@@ -140,6 +157,13 @@ export interface components {
       createdAt: string;
       /** Format: date-time */
       expiresAt: string;
+    };
+    FileHistoryItem: {
+      id: number;
+      originalName: string;
+      mimeType: string;
+      /** Format: date-time */
+      deletedAt: string;
     };
   };
   responses: never;
@@ -260,6 +284,29 @@ export interface operations {
         headers: Record<string, unknown>;
         content: {
           'application/json': components['schemas']['FileListItem'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+    };
+  };
+  FilesController_history: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description File history */
+      200: {
+        headers: Record<string, unknown>;
+        content: {
+          'application/json': components['schemas']['FileHistoryItem'][];
         };
       };
       /** @description Unauthorized */

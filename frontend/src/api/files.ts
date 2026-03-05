@@ -3,6 +3,7 @@ import type { components } from './schema';
 
 export type UploadedFile = components['schemas']['FileEntity'];
 export type FileListItem = components['schemas']['FileListItem'];
+export type FileHistoryItem = components['schemas']['FileHistoryItem'];
 
 export interface FileInfo {
   originalName: string;
@@ -37,6 +38,12 @@ export async function listFiles(
   const { data, error } = await apiClient.GET('/files', {
     params: { query: { filter } },
   });
+  if (error) throw error;
+  return data!;
+}
+
+export async function listFileHistory(): Promise<FileHistoryItem[]> {
+  const { data, error } = await apiClient.GET('/files/history');
   if (error) throw error;
   return data!;
 }

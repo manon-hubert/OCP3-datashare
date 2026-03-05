@@ -1,113 +1,65 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, Flex, Heading, Tabs, Text } from '@chakra-ui/react';
-import { File as FileIcon, Trash2, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { listFiles, deleteFile, type FileListItem } from '../api/files';
+import { Alert, Box, Flex, Heading, Spinner, Tabs, Text } from '@chakra-ui/react';
+import {
+  listFiles,
+  listFileHistory,
+  deleteFile,
+  type FileListItem,
+  type FileHistoryItem,
+} from '../api/files';
+import { FileRow } from '../components/dashboard/FileRow';
 
-type Filter = 'all' | 'active' | 'expired';
-
-function formatExpiry(expiresAt: string): { label: string; expired: boolean } {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const exp = new Date(expiresAt);
-  exp.setHours(0, 0, 0, 0);
-  const diffDays = Math.round((exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (diffDays < 0) return { label: 'Expiré', expired: true };
-  if (diffDays === 0) return { label: "Expire aujourd'hui", expired: false };
-  if (diffDays === 1) return { label: 'Expire demain', expired: false };
-  return { label: `Expire dans ${diffDays} jours`, expired: false };
-}
-
-interface FileRowProps {
-  file: FileListItem;
-  onDelete: (id: string) => void;
-}
-
-function FileRow({ file, onDelete }: FileRowProps) {
-  const { label, expired } = formatExpiry(file.expiresAt);
-
-  return (
-    <Flex
-      align="center"
-      bg="{colors.fileRow.bg}"
-      border="1px solid"
-      borderColor="{colors.fileRow.border}"
-      borderRadius="8px"
-      px="4"
-      py="2"
-      gap="4"
-    >
-      <Box color="{colors.fileRow.icon}" flexShrink={0}>
-        <FileIcon size={24} strokeWidth={1.5} />
-      </Box>
-
-      <Box flex="1" minW="0">
-        <Text
-          textStyle="accent"
-          color="{colors.fileRow.text}"
-          overflow="hidden"
-          textOverflow="ellipsis"
-          whiteSpace="nowrap"
-        >
-          {file.originalName}
-        </Text>
-        <Text
-          textStyle="small"
-          color={expired ? '{colors.fileRow.expiredText}' : '{colors.fileRow.text}'}
-        >
-          {label}
-        </Text>
-      </Box>
-
-      {expired ? (
-        <Text textStyle="small" color="{colors.fileRow.mutedText}" flexShrink={0}>
-          Ce fichier à expiré, il n&apos;est plus stocké chez nous
-        </Text>
-      ) : (
-        <Flex align="center" gap="3" flexShrink={0}>
-          {/*<Box color="#A89890">*/}
-          {/*  <Lock size={16} />*/}
-          {/*</Box>*/}
-          <Button variant="outline" size="sm" gap="2" onClick={() => onDelete(file.id)}>
-            <Trash2 size={14} />
-            Supprimer
-          </Button>
-          <Button asChild variant="outline" size="sm" gap="2">
-            <Link to={`/share/${file.downloadToken}`}>
-              Accéder
-              <ArrowRight size={14} />
-            </Link>
-          </Button>
-        </Flex>
-      )}
-    </Flex>
-  );
-}
+type Tab = 'all' | 'active' | 'expired';
 
 function MyFilesPage() {
-  const [filter, setFilter] = useState<Filter>('all');
+  const [tab, setTab] = useState<Tab>('active');
   const [files, setFiles] = useState<FileListItem[]>([]);
+  const [history, setHistory] = useState<FileHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
-    listFiles(filter)
-      .then(setFiles)
-      .catch(() => setError('Impossible de charger les fichiers.'))
-      .finally(() => setLoading(false));
-  }, [filter]);
+    setFiles([]);
+    setHistory([]);
+    if (tab === 'all') {
+      Promise.all([listFiles('all'), listFileHistory()])
+        .then(([f, h]) => {
+          setFiles(f);
+          setHistory(h);
+        })
+        .catch(() => setError('Impossible de charger les fichiers.'))
+        .finally(() => setLoading(false));
+    } else if (tab === 'expired') {
+      listFileHistory()
+        .then(setHistory)
+        .catch(() => setError("Impossible de charger l'historique."))
+        .finally(() => setLoading(false));
+    } else {
+      listFiles(tab)
+        .then(setFiles)
+        .catch(() => setError('Impossible de charger les fichiers.'))
+        .finally(() => setLoading(false));
+    }
+  }, [tab]);
 
   async function handleDelete(id: string) {
     try {
       await deleteFile(id);
       setFiles((prev) => prev.filter((f) => f.id !== id));
-    } catch {
-      setError('Impossible de supprimer le fichier.');
+    } catch (e) {
+      const message = (e as { error?: { message?: string } })?.error?.message;
+      setError(message ?? 'Impossible de supprimer le fichier.');
     }
   }
+
+  const isEmpty =
+    tab === 'all'
+      ? files.length === 0 && history.length === 0
+      : tab === 'expired'
+        ? history.length === 0
+        : files.length === 0;
 
   return (
     <Box>
@@ -116,8 +68,8 @@ function MyFilesPage() {
       </Heading>
 
       <Tabs.Root
-        value={filter}
-        onValueChange={(e: { value: string }) => setFilter(e.value as Filter)}
+        value={tab}
+        onValueChange={(e: { value: string }) => setTab(e.value as Tab)}
         variant="enclosed"
         mb="6"
       >
@@ -129,24 +81,25 @@ function MyFilesPage() {
       </Tabs.Root>
 
       {error && (
-        <Text color="red.500" mb="4" fontFamily="DM Sans Variable" fontSize="14px">
-          {error}
-        </Text>
+        <Alert.Root status="error" mb="4">
+          <Alert.Indicator />
+          <Alert.Title>{error}</Alert.Title>
+        </Alert.Root>
       )}
 
       {loading ? (
-        <Text textStyle="normal" color="{colors.fileRow.text}">
-          Chargement…
-        </Text>
-      ) : files.length === 0 ? (
+        <Spinner size="xl" color="orange.500" borderWidth="4px" />
+      ) : isEmpty ? (
         <Text textStyle="small" color="{colors.fileRow.text}">
           Aucun fichier à afficher.
         </Text>
       ) : (
         <Flex direction="column" gap="3">
           {files.map((file) => (
-            <FileRow key={file.id} file={file} onDelete={handleDelete} />
+            <FileRow key={file.id} kind="active" file={file} onDelete={handleDelete} />
           ))}
+          {tab !== 'active' &&
+            history.map((item) => <FileRow key={item.id} kind="history" item={item} />)}
         </Flex>
       )}
     </Box>
