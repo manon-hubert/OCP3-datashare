@@ -3,6 +3,8 @@ import type { paths } from './schema';
 
 export const apiClient = createClient<paths>({
   baseUrl: import.meta.env.VITE_API_URL as string,
+  // Indirection so tests can stub globalThis.fetch after the client is created.
+  fetch: (...args: Parameters<typeof fetch>) => globalThis.fetch(...args),
 });
 
 let unauthorizedHandler: (() => void) | null = null;

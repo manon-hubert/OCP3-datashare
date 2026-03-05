@@ -159,7 +159,7 @@ export interface components {
       expiresAt: string;
     };
     FileHistoryItem: {
-      id: number;
+      id: string;
       originalName: string;
       mimeType: string;
       /** Format: date-time */

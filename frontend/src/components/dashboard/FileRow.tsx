@@ -3,7 +3,7 @@ import { File as FileIcon, Trash2, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { FileListItem, FileHistoryItem } from '../../api/files';
 
-function formatExpiry(expiresAt: string): string {
+export function formatExpiry(expiresAt: string): string {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const exp = new Date(expiresAt);
