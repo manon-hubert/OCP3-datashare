@@ -1,9 +1,16 @@
 import { Box, Flex } from '@chakra-ui/react';
-import { Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import Sidebar from './Sidebar.tsx';
 import DashboardHeader from './DashboardHeader.tsx';
 
 function DashboardLayout() {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <Flex minH="100vh">
       <Sidebar />
