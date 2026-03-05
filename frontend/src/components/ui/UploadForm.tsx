@@ -53,7 +53,7 @@ const UploadForm = ({
                 minW={0}
               >
                 <Text
-                  textStyle="body"
+                  textStyle="normal"
                   color="form.darkText"
                   overflow="hidden"
                   whiteSpace="nowrap"
@@ -62,10 +62,7 @@ const UploadForm = ({
                 >
                   {file.name}
                 </Text>
-                <Text
-                  textStyle="caption"
-                  color={fileSizeError ? 'form.errorText' : 'form.darkText'}
-                >
+                <Text textStyle="small" color={fileSizeError ? 'form.errorText' : 'form.darkText'}>
                   <FormatByte value={file.size} unitDisplay="short" unitSystem="decimal" />
                 </Text>
               </Flex>
@@ -84,7 +81,7 @@ const UploadForm = ({
           </Flex>
 
           {fileSizeError && (
-            <Text textStyle="body" color="form.errorText">
+            <Text textStyle="normal" color="form.errorText">
               La taille des fichiers est limitée à{' '}
               <FormatByte
                 value={Number(import.meta.env.VITE_MAX_FILE_SIZE)}

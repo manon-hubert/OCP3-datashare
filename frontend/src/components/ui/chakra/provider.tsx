@@ -1,7 +1,7 @@
 'use client';
 
 import { ChakraProvider, LocaleProvider as ChakraLocaleProvider } from '@chakra-ui/react';
-import { system } from '../../../theme.ts';
+import { system } from '../../../theme/index.ts';
 import { ColorModeProvider, type ColorModeProviderProps } from './color-mode.tsx';
 import type { FC, ReactNode } from 'react';
 

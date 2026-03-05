@@ -67,7 +67,7 @@ const DownloadCard = ({ fileInfo, token }: DownloadCardProps) => {
                 minW={0}
               >
                 <Text
-                  textStyle="body"
+                  textStyle="normal"
                   color="form.darkText"
                   overflow="hidden"
                   whiteSpace="nowrap"
@@ -76,7 +76,7 @@ const DownloadCard = ({ fileInfo, token }: DownloadCardProps) => {
                 >
                   {fileInfo.originalName}
                 </Text>
-                <Text textStyle="caption" color="form.darkText">
+                <Text textStyle="small" color="form.darkText">
                   <FormatByte value={fileInfo.size} unitDisplay="short" unitSystem="decimal" />
                 </Text>
               </Flex>

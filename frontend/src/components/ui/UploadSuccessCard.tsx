@@ -22,7 +22,7 @@ const UploadSuccessCard = ({ uploadedFile }: UploadSuccessCardProps) => {
           </Box>
           <Flex direction="column" justify="center" align="flex-start" flex="1" h="40px" minW={0}>
             <Text
-              textStyle="body"
+              textStyle="normal"
               color="form.darkText"
               overflow="hidden"
               whiteSpace="nowrap"
@@ -31,14 +31,14 @@ const UploadSuccessCard = ({ uploadedFile }: UploadSuccessCardProps) => {
             >
               {uploadedFile.originalName}
             </Text>
-            <Text textStyle="caption" color="form.darkText">
+            <Text textStyle="small" color="form.darkText">
               <FormatByte value={uploadedFile.size} unitDisplay="short" unitSystem="decimal" />
             </Text>
           </Flex>
         </Flex>
 
         <Stack gap="2">
-          <Text textStyle="body" color="form.darkText">
+          <Text textStyle="normal" color="form.darkText">
             Félicitations, ton fichier sera conservé chez nous pendant une semaine !
           </Text>
           <Flex
@@ -52,7 +52,7 @@ const UploadSuccessCard = ({ uploadedFile }: UploadSuccessCardProps) => {
             borderColor="form.urlBorder"
           >
             <Text
-              textStyle="body"
+              textStyle="normal"
               textDecoration="underline"
               color="form.linkText"
               overflow="hidden"
