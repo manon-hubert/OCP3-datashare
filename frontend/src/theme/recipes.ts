@@ -11,7 +11,6 @@ export const buttonRecipe = defineRecipe({
     textDecoration: 'none',
     fontFamily: 'DM Sans Variable',
     fontWeight: '400',
-    fontSize: '16px',
   },
   variants: {
     variant: {
@@ -50,8 +49,8 @@ export const buttonRecipe = defineRecipe({
       },
     },
     size: {
-      sm: { px: '12px', py: '8px', height: '32px' },
-      md: { px: '12px', py: '12px', height: '40px' },
+      sm: { px: '12px', py: '8px', fontSize: '16px', height: '32px' },
+      md: { px: '12px', py: '12px', fontSize: '16px', height: '40px' },
     },
   },
   defaultVariants: {

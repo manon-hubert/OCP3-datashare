@@ -139,11 +139,11 @@ function MyFilesPage() {
       )}
 
       {loading ? (
-        <Text fontFamily="DM Sans Variable" color="#6B5B55">
+        <Text textStyle="normal" color="{colors.form.darkText}">
           Chargement…
         </Text>
       ) : files.length === 0 ? (
-        <Text fontFamily="DM Sans Variable" color="#6B5B55">
+        <Text textStyle="small" color="{colors.form.darkText}">
           Aucun fichier à afficher.
         </Text>
       ) : (

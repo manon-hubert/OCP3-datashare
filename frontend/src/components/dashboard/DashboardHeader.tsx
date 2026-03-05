@@ -22,7 +22,7 @@ function DashboardHeader() {
         direction="row"
         justify="flex-end"
         align="center"
-        p="4"
+        px="4"
         gap="10px"
         maxW="1280px"
         alignSelf="stretch"

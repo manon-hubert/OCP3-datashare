@@ -42,6 +42,7 @@ export const tabsSlotRecipe = defineSlotRecipe({
           fontWeight: '400',
           fontFamily: 'DM Sans Variable',
           color: '{colors.filterTabs.inactiveText}',
+          lineHeight: '16px',
           height: '100%',
           borderRadius: '0',
           border: 'none',

@@ -9,6 +9,7 @@ function Sidebar() {
       as="nav"
       direction="column"
       minH="100vh"
+      w="259px"
       flexShrink={0}
       bg="{colors.dashboard.sidebar.bg}"
       borderRight="2px solid"

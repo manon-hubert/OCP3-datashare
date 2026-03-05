@@ -9,7 +9,7 @@ function DashboardLayout() {
       <Sidebar />
       <Flex direction="column" flex="1" bg="#FAF5F0" overflow="auto">
         <DashboardHeader />
-        <Box flex="1" px="8" pb="8">
+        <Box flex="1" p="6">
           <Outlet />
         </Box>
       </Flex>
