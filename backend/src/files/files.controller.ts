@@ -19,6 +19,7 @@ import type { Response } from 'express';
 import { memoryStorage } from 'multer';
 import { FilesService } from './files.service';
 import { FileEntity } from './entities/file.entity';
+import { FileHistoryEntity } from './entities/file-history.entity';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser, type JwtPayload } from '../common/decorators/current-user.decorator';
 import { FileSizePipe } from '../common/pipes/file-size.pipe';
@@ -58,6 +59,15 @@ export class FilesController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async list(@CurrentUser() user: JwtPayload, @Query() query: ListFilesQueryDto) {
     return this.filesService.listUserFiles(user.sub, query.filter!);
+  }
+
+  @Get('history')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'List deleted/expired files for authenticated user' })
+  @ApiResponse({ status: 200, description: 'File history', type: [FileHistoryEntity] })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async history(@CurrentUser() user: JwtPayload) {
+    return this.filesService.listUserHistory(user.sub);
   }
 
   @Delete(':id')

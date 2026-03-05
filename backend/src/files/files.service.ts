@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as crypto from 'node:crypto';
 import { FileEntity } from './entities/file.entity';
+import { FileHistoryEntity } from './entities/file-history.entity';
 import { StorageService } from '../storage/storage.service';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime-types';
 import { ErrorCode, ErrorMessage } from '../common/constants/error-codes';
@@ -20,6 +21,8 @@ export class FilesService {
   constructor(
     @InjectRepository(FileEntity)
     private readonly filesRepository: Repository<FileEntity>,
+    @InjectRepository(FileHistoryEntity)
+    private readonly fileHistoryRepository: Repository<FileHistoryEntity>,
     private readonly storageService: StorageService,
   ) {}
 
@@ -101,14 +104,30 @@ export class FilesService {
     }));
   }
 
+  async listUserHistory(userId: number): Promise<FileHistoryEntity[]> {
+    return this.fileHistoryRepository.find({
+      where: { userId },
+      order: { deletedAt: 'DESC' },
+    });
+  }
+
   async deleteFile(file: FileEntity): Promise<void> {
-    await this.filesRepository.delete(file.id);
     const storagePath = file.userId ? `users/${file.userId}/${file.id}` : `anonymous/${file.id}`;
     try {
       await this.storageService.delete(storagePath);
     } catch {
       // Storage cleanup failure is non-critical after DB deletion
     }
+
+    await this.fileHistoryRepository.save(
+      this.fileHistoryRepository.create({
+        userId: file.userId,
+        originalName: file.originalName,
+        mimeType: file.mimeType,
+      }),
+    );
+
+    await this.filesRepository.delete(file.id);
   }
 
   async getBufferByToken(

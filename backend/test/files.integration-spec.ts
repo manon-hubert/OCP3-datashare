@@ -11,6 +11,7 @@ import { App } from 'supertest/types';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../src/auth/entity/user.entity';
 import { FileEntity } from '../src/files/entities/file.entity';
+import { FileHistoryEntity } from '../src/files/entities/file-history.entity';
 import { StorageService } from '../src/storage/storage.service';
 import { ErrorCode, ErrorMessage } from '../src/common/constants/error-codes';
 import { HttpExceptionFilter } from '../src/common/filters/http-exception.filter';
@@ -33,6 +34,7 @@ describe('Files (integration)', () => {
   let app: INestApplication<App>;
   let usersRepository: Repository<UserEntity>;
   let filesRepository: Repository<FileEntity>;
+  let fileHistoryRepository: Repository<FileHistoryEntity>;
   let storageService: StorageService;
   let authToken: string;
   let userId: number;
@@ -72,6 +74,9 @@ describe('Files (integration)', () => {
 
     usersRepository = moduleFixture.get<Repository<UserEntity>>(getRepositoryToken(UserEntity));
     filesRepository = moduleFixture.get<Repository<FileEntity>>(getRepositoryToken(FileEntity));
+    fileHistoryRepository = moduleFixture.get<Repository<FileHistoryEntity>>(
+      getRepositoryToken(FileHistoryEntity),
+    );
     storageService = moduleFixture.get(StorageService);
 
     await request(app.getHttpServer())
@@ -97,6 +102,7 @@ describe('Files (integration)', () => {
 
   afterEach(async () => {
     await filesRepository.delete({ userId });
+    await fileHistoryRepository.delete({ userId });
   });
 
   describe('POST /files', () => {
@@ -245,6 +251,206 @@ describe('Files (integration)', () => {
           message: ErrorMessage[ErrorCode.FILE_GONE],
         },
       });
+    });
+  });
+
+  describe('DELETE /files/:id', () => {
+    let fileId: string;
+
+    beforeEach(async () => {
+      const res = await request(app.getHttpServer())
+        .post('/files')
+        .set('Authorization', `Bearer ${authToken}`)
+        .attach('file', SMALL_PNG, { filename: 'photo.png', contentType: 'image/png' });
+      fileId = res.body.id as string;
+    });
+
+    it('returns 204 on success', async () => {
+      await request(app.getHttpServer())
+        .delete(`/files/${fileId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(204);
+    });
+
+    it('removes the file from the files table', async () => {
+      await request(app.getHttpServer())
+        .delete(`/files/${fileId}`)
+        .set('Authorization', `Bearer ${authToken}`);
+
+      const found = await filesRepository.findOneBy({ id: fileId });
+      expect(found).toBeNull();
+    });
+
+    it('removes the file from storage', async () => {
+      await request(app.getHttpServer())
+        .delete(`/files/${fileId}`)
+        .set('Authorization', `Bearer ${authToken}`);
+
+      await expect(storageService.read(`users/${userId}/${fileId}`)).rejects.toMatchObject({
+        code: 'ENOENT',
+      });
+    });
+
+    it('creates a file_history record with the correct fields', async () => {
+      await request(app.getHttpServer())
+        .delete(`/files/${fileId}`)
+        .set('Authorization', `Bearer ${authToken}`);
+
+      const history = await fileHistoryRepository.findOneBy({ userId });
+      expect(history).toMatchObject({
+        userId,
+        originalName: 'photo.png',
+        mimeType: 'image/png',
+      });
+      expect(history!.deletedAt).toBeInstanceOf(Date);
+    });
+
+    it('returns 401 when no token is provided', async () => {
+      await request(app.getHttpServer()).delete(`/files/${fileId}`).expect(401);
+    });
+
+    it('returns 403 when the file belongs to another user', async () => {
+      const otherEmail = 'other-delete@datashare.test';
+      await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ email: otherEmail, password: TEST_PASSWORD });
+      const loginRes = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: otherEmail, password: TEST_PASSWORD });
+      const otherToken = loginRes.body.access_token as string;
+
+      await request(app.getHttpServer())
+        .delete(`/files/${fileId}`)
+        .set('Authorization', `Bearer ${otherToken}`)
+        .expect(403);
+
+      await usersRepository.delete({ email: otherEmail });
+    });
+
+    it('returns 404 when the file does not exist', async () => {
+      await request(app.getHttpServer())
+        .delete('/files/00000000-0000-0000-0000-000000000000')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(404);
+    });
+  });
+
+  describe('GET /files/history', () => {
+    it('returns 200 with an empty array when the user has no history', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/files/history')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(res.body).toEqual([]);
+    });
+
+    it('returns the history entry after a file is deleted', async () => {
+      const uploadRes = await request(app.getHttpServer())
+        .post('/files')
+        .set('Authorization', `Bearer ${authToken}`)
+        .attach('file', SMALL_PNG, { filename: 'photo.png', contentType: 'image/png' });
+      const id = uploadRes.body.id as string;
+
+      await request(app.getHttpServer())
+        .delete(`/files/${id}`)
+        .set('Authorization', `Bearer ${authToken}`);
+
+      const res = await request(app.getHttpServer())
+        .get('/files/history')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(res.body).toHaveLength(1);
+      expect(res.body[0]).toMatchObject({
+        originalName: 'photo.png',
+        mimeType: 'image/png',
+        deletedAt: expect.any(String),
+      });
+      expect(res.body[0].userId).toBeUndefined();
+    });
+
+    it('returns entries ordered by deletedAt DESC', async () => {
+      for (const name of ['first.png', 'second.png']) {
+        const uploadRes = await request(app.getHttpServer())
+          .post('/files')
+          .set('Authorization', `Bearer ${authToken}`)
+          .attach('file', SMALL_PNG, { filename: name, contentType: 'image/png' });
+        await request(app.getHttpServer())
+          .delete(`/files/${uploadRes.body.id as string}`)
+          .set('Authorization', `Bearer ${authToken}`);
+      }
+
+      const res = await request(app.getHttpServer())
+        .get('/files/history')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(res.body[0].originalName).toBe('second.png');
+      expect(res.body[1].originalName).toBe('first.png');
+    });
+
+    it('returns 401 when no token is provided', async () => {
+      await request(app.getHttpServer()).get('/files/history').expect(401);
+    });
+
+    it('does not return another user history', async () => {
+      const otherEmail = 'other-history@datashare.test';
+      await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ email: otherEmail, password: TEST_PASSWORD });
+      const otherLogin = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: otherEmail, password: TEST_PASSWORD });
+      const otherToken = otherLogin.body.access_token as string;
+
+      const uploadRes = await request(app.getHttpServer())
+        .post('/files')
+        .set('Authorization', `Bearer ${otherToken}`)
+        .attach('file', SMALL_PNG, { filename: 'other.png', contentType: 'image/png' });
+      await request(app.getHttpServer())
+        .delete(`/files/${uploadRes.body.id as string}`)
+        .set('Authorization', `Bearer ${otherToken}`);
+
+      const res = await request(app.getHttpServer())
+        .get('/files/history')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(res.body).toEqual([]);
+
+      const otherUser = await usersRepository.findOneBy({ email: otherEmail });
+      await fileHistoryRepository.delete({ userId: otherUser!.id });
+      await usersRepository.delete({ email: otherEmail });
+    });
+  });
+
+  describe('GET /files', () => {
+    it('does not return another user files', async () => {
+      const otherEmail = 'other-list@datashare.test';
+      await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ email: otherEmail, password: TEST_PASSWORD });
+      const otherLogin = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: otherEmail, password: TEST_PASSWORD });
+      const otherToken = otherLogin.body.access_token as string;
+
+      await request(app.getHttpServer())
+        .post('/files')
+        .set('Authorization', `Bearer ${otherToken}`)
+        .attach('file', SMALL_PNG, { filename: 'other.png', contentType: 'image/png' });
+
+      const res = await request(app.getHttpServer())
+        .get('/files')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(res.body).toEqual([]);
+
+      const otherUser = await usersRepository.findOneBy({ email: otherEmail });
+      await filesRepository.delete({ userId: otherUser!.id });
+      await usersRepository.delete({ email: otherEmail });
     });
   });
 });

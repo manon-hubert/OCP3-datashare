@@ -4,6 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { fileTypeFromBuffer } from 'file-type';
 import { FilesService } from './files.service';
 import { FileEntity } from './entities/file.entity';
+import { FileHistoryEntity } from './entities/file-history.entity';
 import { StorageService } from '../storage/storage.service';
 import { ErrorCode } from '../common/constants/error-codes';
 
@@ -31,7 +32,8 @@ describe('FilesService', () => {
     save: jest.Mock;
     delete: jest.Mock;
   };
-  let storageService: { save: jest.Mock; read: jest.Mock };
+  let fileHistoryRepository: { create: jest.Mock; save: jest.Mock; find: jest.Mock };
+  let storageService: { save: jest.Mock; read: jest.Mock; delete: jest.Mock };
 
   beforeEach(async () => {
     filesRepository = {
@@ -40,15 +42,22 @@ describe('FilesService', () => {
       save: jest.fn(),
       delete: jest.fn(),
     };
+    fileHistoryRepository = {
+      create: jest.fn((data) => data),
+      save: jest.fn(),
+      find: jest.fn(),
+    };
     storageService = {
       save: jest.fn(),
       read: jest.fn(),
+      delete: jest.fn(),
     };
 
     const module = await Test.createTestingModule({
       providers: [
         FilesService,
         { provide: getRepositoryToken(FileEntity), useValue: filesRepository },
+        { provide: getRepositoryToken(FileHistoryEntity), useValue: fileHistoryRepository },
         { provide: StorageService, useValue: storageService },
       ],
     }).compile();
@@ -224,6 +233,105 @@ describe('FilesService', () => {
       storageService.read.mockRejectedValue(new Error('permission denied'));
 
       await expect(service.getBufferByToken('token-abc')).rejects.toThrow('permission denied');
+    });
+  });
+
+  describe('deleteFile', () => {
+    const file = {
+      id: 'uuid-1',
+      userId: 42,
+      originalName: 'report.pdf',
+      mimeType: 'application/pdf',
+    } as FileEntity;
+
+    it('deletes from storage, inserts history, then deletes from files', async () => {
+      storageService.delete.mockResolvedValue(undefined);
+      fileHistoryRepository.save.mockResolvedValue(undefined);
+      filesRepository.delete.mockResolvedValue(undefined);
+
+      await service.deleteFile(file);
+
+      const storageOrder = storageService.delete.mock.invocationCallOrder[0];
+      const historyOrder = fileHistoryRepository.save.mock.invocationCallOrder[0];
+      const deleteOrder = filesRepository.delete.mock.invocationCallOrder[0];
+
+      expect(storageOrder).toBeLessThan(historyOrder);
+      expect(historyOrder).toBeLessThan(deleteOrder);
+    });
+
+    it('uses users/{userId}/{fileId} storage path for authenticated files', async () => {
+      storageService.delete.mockResolvedValue(undefined);
+      fileHistoryRepository.save.mockResolvedValue(undefined);
+      filesRepository.delete.mockResolvedValue(undefined);
+
+      await service.deleteFile(file);
+
+      expect(storageService.delete).toHaveBeenCalledWith('users/42/uuid-1');
+    });
+
+    it('records user_id, original_name, and mime_type in file_history', async () => {
+      storageService.delete.mockResolvedValue(undefined);
+      fileHistoryRepository.save.mockResolvedValue(undefined);
+      filesRepository.delete.mockResolvedValue(undefined);
+
+      await service.deleteFile(file);
+
+      expect(fileHistoryRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 42,
+          originalName: 'report.pdf',
+          mimeType: 'application/pdf',
+        }),
+      );
+    });
+
+    it('still records history and deletes from DB when storage delete fails', async () => {
+      storageService.delete.mockRejectedValue(new Error('storage error'));
+      fileHistoryRepository.save.mockResolvedValue(undefined);
+      filesRepository.delete.mockResolvedValue(undefined);
+
+      await service.deleteFile(file);
+
+      expect(fileHistoryRepository.save).toHaveBeenCalledTimes(1);
+      expect(filesRepository.delete).toHaveBeenCalledWith('uuid-1');
+    });
+  });
+
+  describe('listUserHistory', () => {
+    it('returns history entries for the user ordered by deletedAt DESC', async () => {
+      const entries = [
+        {
+          id: 2,
+          userId: 1,
+          originalName: 'b.pdf',
+          mimeType: 'application/pdf',
+          deletedAt: new Date('2024-02-01'),
+        },
+        {
+          id: 1,
+          userId: 1,
+          originalName: 'a.png',
+          mimeType: 'image/png',
+          deletedAt: new Date('2024-01-01'),
+        },
+      ];
+      fileHistoryRepository.find.mockResolvedValue(entries);
+
+      const result = await service.listUserHistory(1);
+
+      expect(fileHistoryRepository.find).toHaveBeenCalledWith({
+        where: { userId: 1 },
+        order: { deletedAt: 'DESC' },
+      });
+      expect(result).toBe(entries);
+    });
+
+    it('returns an empty array when the user has no history', async () => {
+      fileHistoryRepository.find.mockResolvedValue([]);
+
+      const result = await service.listUserHistory(99);
+
+      expect(result).toEqual([]);
     });
   });
 });
