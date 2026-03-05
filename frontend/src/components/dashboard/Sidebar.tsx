@@ -1,32 +1,30 @@
-import { Box, Flex, Heading, Text } from '@chakra-ui/react';
+import { Flex, Heading } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
+import Footer from '../common/Footer';
+import NavItem from './NavItem';
 
 function Sidebar() {
   return (
     <Flex
       as="nav"
       direction="column"
-      w="230px"
       minH="100vh"
       flexShrink={0}
-      background="linear-gradient(to bottom, #E07B5D, #B84630)"
-      p="6"
+      bg="{colors.dashboard.sidebar.bg}"
+      borderRight="2px solid"
+      borderColor="{colors.dashboard.sidebar.border}"
     >
-      <Heading asChild as="h1" size="h1" color="white" fontSize="24px" fontWeight="700" mb="10">
-        <Link to="/">DataShare</Link>
-      </Heading>
+      <Flex direction="column" justify="center" align="center" px="32px" h="72px" flexShrink={0}>
+        <Heading asChild as="h1" size="h1" color="white" alignSelf="stretch">
+          <Link to="/">DataShare</Link>
+        </Heading>
+      </Flex>
 
-      <Box>
-        <Box bg="rgba(255,255,255,0.15)" borderRadius="8px" px="4" py="3" cursor="pointer">
-          <Text color="white" fontFamily="DM Sans Variable" fontWeight="500" fontSize="15px">
-            Mes fichiers
-          </Text>
-        </Box>
-      </Box>
+      <Flex direction="column" flexGrow={1} p="24px" gap="10px">
+        <NavItem to="/my-files" label="Mes fichiers" />
+      </Flex>
 
-      <Text mt="auto" color="rgba(255,255,255,0.7)" fontSize="13px" fontFamily="DM Sans Variable">
-        Copyright DataShare&copy; {new Date().getFullYear()}
-      </Text>
+      <Footer />
     </Flex>
   );
 }

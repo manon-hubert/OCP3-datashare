@@ -13,12 +13,14 @@ const FILTERS: { value: Filter; label: string }[] = [
 ];
 
 function formatExpiry(expiresAt: string): { label: string; expired: boolean } {
-  const now = new Date();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const exp = new Date(expiresAt);
-  const diffMs = exp.getTime() - now.getTime();
-  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  exp.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (diffDays <= 0) return { label: 'Expiré', expired: true };
+  if (diffDays < 0) return { label: 'Expiré', expired: true };
+  if (diffDays === 0) return { label: "Expire aujourd'hui", expired: false };
   if (diffDays === 1) return { label: 'Expire demain', expired: false };
   return { label: `Expire dans ${diffDays} jours`, expired: false };
 }

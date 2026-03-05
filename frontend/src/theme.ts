@@ -214,6 +214,19 @@ const config = defineConfig({
             bg: { value: '#FFEEE3' },
             border: { value: 'rgba(216, 97, 28, 0.29)' },
           },
+          sidebar: {
+            bg: { value: 'linear-gradient(172.84deg, #FFB88C 2.29%, #DE6262 97.71%)' },
+            border: { value: 'rgba(98, 54, 26, 0.15)' },
+            activeNavBg: { value: 'rgba(255, 255, 255, 0.4)' },
+            activeNavText: { value: '#803A00' },
+            copyright: { value: '#F1E9E2' },
+          },
+          navItem: {
+            activeBg: { value: 'rgba(255, 255, 255, 0.4)' },
+            activeText: { value: '#803A00' },
+            inactiveBg: { value: 'transparent' },
+            inactiveText: { value: '#B87A50' },
+          },
         },
         alert: {
           success: {
@@ -264,6 +277,14 @@ const config = defineConfig({
           fontWeight: '400',
           fontSize: '14px',
           lineHeight: '16px',
+        },
+      },
+      accent: {
+        value: {
+          fontFamily: 'DM Sans Variable, sans-serif',
+          fontWeight: '600',
+          fontSize: '16px',
+          lineHeight: '24px',
         },
       },
     },
