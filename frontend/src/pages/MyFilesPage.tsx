@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, Flex, Heading, Tabs, Text } from '@chakra-ui/react';
-import { File as FileIcon, Lock, Trash2, ArrowRight } from 'lucide-react';
+import { File as FileIcon, Trash2, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { listFiles, deleteFile, type FileListItem } from '../api/files';
 
@@ -30,24 +30,22 @@ function FileRow({ file, onDelete }: FileRowProps) {
   return (
     <Flex
       align="center"
-      bg="white"
+      bg="{colors.fileRow.bg}"
       border="1px solid"
-      borderColor="#ECDDD5"
-      borderRadius="12px"
-      px="5"
-      py="4"
+      borderColor="{colors.fileRow.border}"
+      borderRadius="8px"
+      px="4"
+      py="2"
       gap="4"
     >
-      <Box color="#5A4A42" flexShrink={0}>
+      <Box color="{colors.fileRow.icon}" flexShrink={0}>
         <FileIcon size={24} strokeWidth={1.5} />
       </Box>
 
       <Box flex="1" minW="0">
         <Text
-          fontFamily="DM Sans Variable"
-          fontWeight="500"
-          fontSize="15px"
-          color="#1E1E1E"
+          textStyle="accent"
+          color="{colors.fileRow.text}"
           overflow="hidden"
           textOverflow="ellipsis"
           whiteSpace="nowrap"
@@ -55,24 +53,22 @@ function FileRow({ file, onDelete }: FileRowProps) {
           {file.originalName}
         </Text>
         <Text
-          fontFamily="DM Sans Variable"
-          fontSize="13px"
-          color={expired ? '#E27F29' : '#6B5B55'}
-          mt="0.5"
+          textStyle="small"
+          color={expired ? '{colors.fileRow.expiredText}' : '{colors.fileRow.text}'}
         >
           {label}
         </Text>
       </Box>
 
       {expired ? (
-        <Text fontFamily="DM Sans Variable" fontSize="14px" color="#A89890" flexShrink={0}>
+        <Text textStyle="small" color="{colors.fileRow.mutedText}" flexShrink={0}>
           Ce fichier à expiré, il n&apos;est plus stocké chez nous
         </Text>
       ) : (
         <Flex align="center" gap="3" flexShrink={0}>
-          <Box color="#A89890">
-            <Lock size={16} />
-          </Box>
+          {/*<Box color="#A89890">*/}
+          {/*  <Lock size={16} />*/}
+          {/*</Box>*/}
           <Button variant="outline" size="sm" gap="2" onClick={() => onDelete(file.id)}>
             <Trash2 size={14} />
             Supprimer
@@ -139,11 +135,11 @@ function MyFilesPage() {
       )}
 
       {loading ? (
-        <Text textStyle="normal" color="{colors.form.darkText}">
+        <Text textStyle="normal" color="{colors.fileRow.text}">
           Chargement…
         </Text>
       ) : files.length === 0 ? (
-        <Text textStyle="small" color="{colors.form.darkText}">
+        <Text textStyle="small" color="{colors.fileRow.text}">
           Aucun fichier à afficher.
         </Text>
       ) : (

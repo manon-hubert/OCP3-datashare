@@ -49,6 +49,14 @@ export const tokens = {
         inactiveText: { value: '#B87A50' },
       },
     },
+    fileRow: {
+      bg: { value: 'rgba(255, 193, 145, 0.05)' },
+      border: { value: 'rgba(215, 99, 11, 0.2)' },
+      icon: { value: '#5A4A42' },
+      text: { value: '#1E1E1E' },
+      expiredText: { value: '#C62020' },
+      mutedText: { value: 'rgba(0, 0, 0, 0.5)' },
+    },
     alert: {
       success: {
         bg: { value: '#E8F5E9' },
