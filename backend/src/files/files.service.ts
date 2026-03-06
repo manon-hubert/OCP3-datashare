@@ -121,6 +121,7 @@ export class FilesService {
 
     await this.fileHistoryRepository.save(
       this.fileHistoryRepository.create({
+        id: file.id,
         userId: file.userId,
         originalName: file.originalName,
         mimeType: file.mimeType,

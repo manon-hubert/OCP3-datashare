@@ -278,6 +278,7 @@ describe('FilesService', () => {
 
       expect(fileHistoryRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: 'uuid-1',
           userId: 42,
           originalName: 'report.pdf',
           mimeType: 'application/pdf',
@@ -301,14 +302,14 @@ describe('FilesService', () => {
     it('returns history entries for the user ordered by deletedAt DESC', async () => {
       const entries = [
         {
-          id: 2,
+          id: 'uuid-2',
           userId: 1,
           originalName: 'b.pdf',
           mimeType: 'application/pdf',
           deletedAt: new Date('2024-02-01'),
         },
         {
-          id: 1,
+          id: 'uuid-1',
           userId: 1,
           originalName: 'a.png',
           mimeType: 'image/png',
