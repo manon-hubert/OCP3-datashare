@@ -32,7 +32,19 @@ const UploadForm = ({
   });
 
   return (
-    <Box as="form" onSubmit={onSubmit} noValidate layerStyle="card" width="100%" maxW="400px">
+    <Box
+      as="form"
+      onSubmit={onSubmit}
+      noValidate
+      layerStyle="card"
+      width="100%"
+      maxW={{ base: '100%', md: '400px' }}
+      borderRadius={{ base: '16px 16px 0px 0px', md: '16px' }}
+      position={{ base: 'fixed', md: 'static' }}
+      bottom={{ base: '0', md: 'auto' }}
+      left={{ base: '0', md: 'auto' }}
+      right={{ base: '0', md: 'auto' }}
+    >
       <Stack gap="6">
         <Heading as="h2" size="h2" textAlign="center" m="0">
           Ajouter un fichier

@@ -83,7 +83,7 @@ const DownloadCard = ({ fileInfo, token }: DownloadCardProps) => {
             </Flex>
           )}
 
-          <Alert.Root status={status}>
+          <Alert.Root status={status} size="sm">
             <Alert.Indicator />
             <Alert.Title>{message}</Alert.Title>
           </Alert.Root>

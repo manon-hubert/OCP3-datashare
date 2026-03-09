@@ -6,7 +6,14 @@ function Header() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <Flex as="header" justify="space-between" align="center" p="3" padding="16px">
+    <Flex
+      as="header"
+      justify="space-between"
+      align="center"
+      py="16px"
+      px={{ base: '16px', md: '80px' }}
+      w="100%"
+    >
       <Heading asChild as="h1" size="h1" m="0">
         <Link to="/">Datashare</Link>
       </Heading>

@@ -5,7 +5,7 @@ import Header from './Header.tsx';
 
 function Layout() {
   return (
-    <Flex direction="column" minH="100vh" maxW="90vw" mx="auto">
+    <Flex direction="column" minH="100vh" w="100%" mx="auto">
       <Header />
       <Outlet />
       <Footer />

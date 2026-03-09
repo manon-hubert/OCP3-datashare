@@ -1,5 +1,24 @@
 import { defineSlotRecipe } from '@chakra-ui/react';
 
+export const menuSlotRecipe = defineSlotRecipe({
+  slots: ['item'],
+  base: {
+    item: {
+      fontFamily: 'DM Sans Variable',
+      fontWeight: '400',
+      _highlighted: {
+        fontWeight: '600',
+      },
+    },
+  },
+  variants: {
+    size: {
+      sm: { item: { fontSize: '16px' } },
+      md: { item: { fontSize: '16px' } },
+    },
+  },
+});
+
 export const fieldSlotRecipe = defineSlotRecipe({
   slots: ['label', 'errorText'],
   base: {
@@ -74,7 +93,13 @@ export const alertSlotRecipe = defineSlotRecipe({
     {
       status: 'success',
       css: {
-        root: { bg: '{colors.alert.success.bg}', padding: '8px', alignItems: 'center' },
+        root: {
+          bg: '{colors.alert.success.bg}',
+          padding: '8px',
+          alignItems: 'center',
+          borderWidth: '1px',
+          borderColor: '{colors.alert.success.border}',
+        },
         indicator: { color: '{colors.alert.success.text}' },
         title: { color: '{colors.alert.success.text}' },
         description: { color: '{colors.alert.success.text}' },
@@ -83,7 +108,13 @@ export const alertSlotRecipe = defineSlotRecipe({
     {
       status: 'error',
       css: {
-        root: { bg: '{colors.alert.error.bg}', padding: '8px', alignItems: 'center' },
+        root: {
+          bg: '{colors.alert.error.bg}',
+          padding: '8px',
+          alignItems: 'center',
+          borderWidth: '1px',
+          borderColor: '{colors.alert.error.border}',
+        },
         indicator: { color: '{colors.alert.error.text}' },
         title: { color: '{colors.alert.error.text}' },
         description: { color: '{colors.alert.error.text}' },
@@ -92,7 +123,13 @@ export const alertSlotRecipe = defineSlotRecipe({
     {
       status: 'info',
       css: {
-        root: { bg: '{colors.alert.info.bg}', padding: '8px', alignItems: 'center' },
+        root: {
+          bg: '{colors.alert.info.bg}',
+          padding: '8px',
+          alignItems: 'center',
+          borderWidth: '1px',
+          borderColor: '{colors.alert.info.border}',
+        },
         indicator: { color: '{colors.alert.info.text}' },
         title: { color: '{colors.alert.info.text}' },
         description: { color: '{colors.alert.info.text}' },
@@ -101,7 +138,13 @@ export const alertSlotRecipe = defineSlotRecipe({
     {
       status: 'warning',
       css: {
-        root: { bg: '{colors.alert.warning.bg}', padding: '8px', alignItems: 'center' },
+        root: {
+          bg: '{colors.alert.warning.bg}',
+          padding: '8px',
+          alignItems: 'center',
+          borderWidth: '1px',
+          borderColor: '{colors.alert.warning.border}',
+        },
         indicator: { color: '{colors.alert.warning.text}' },
         title: { color: '{colors.alert.warning.text}' },
         description: { color: '{colors.alert.warning.text}' },

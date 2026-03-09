@@ -10,7 +10,16 @@ const UploadSuccessCard = ({ uploadedFile }: UploadSuccessCardProps) => {
   const shareUrl = `${window.location.origin}/share/${uploadedFile.downloadToken}`;
 
   return (
-    <Box layerStyle="card" width="100%" maxW="540px">
+    <Box
+      layerStyle="card"
+      width="100%"
+      maxW={{ base: '100%', md: '540px' }}
+      borderRadius={{ base: '16px 16px 0px 0px', md: '16px' }}
+      position={{ base: 'fixed', md: 'static' }}
+      bottom={{ base: '0', md: 'auto' }}
+      left={{ base: '0', md: 'auto' }}
+      right={{ base: '0', md: 'auto' }}
+    >
       <Stack gap="6">
         <Heading as="h2" size="h2" textAlign="center" m="0">
           Ajouter un fichier

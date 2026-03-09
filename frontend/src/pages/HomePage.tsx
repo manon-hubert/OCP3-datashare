@@ -78,7 +78,14 @@ const HomePage = () => {
   };
 
   return (
-    <Flex as="main" flex="1" align="center" justify="center" px="4" width="100%">
+    <Flex
+      as="main"
+      flex="1"
+      align="center"
+      justify="center"
+      px={{ base: '0', md: '4' }}
+      width="100%"
+    >
       <input
         type="file"
         ref={fileInputRef}

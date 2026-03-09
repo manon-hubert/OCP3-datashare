@@ -61,18 +61,22 @@ export const tokens = {
       success: {
         bg: { value: '#E8F5E9' },
         text: { value: '#2E7D32' },
+        border: { value: '#A5D6A7' },
       },
       error: {
         bg: { value: '#FFE2E2' },
         text: { value: '#9C3333' },
+        border: { value: '#E8A6A6' },
       },
       info: {
         bg: { value: '#E2ECFF' },
         text: { value: '#2A3F72' },
+        border: { value: '#B1C9F5' },
       },
       warning: {
         bg: { value: '#FFF5ED' },
         text: { value: '#AA642B' },
+        border: { value: '#E6CBB5' },
       },
     },
   },

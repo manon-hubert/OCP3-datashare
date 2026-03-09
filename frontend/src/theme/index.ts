@@ -2,7 +2,7 @@ import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react';
 import { tokens } from './tokens';
 import { layerStyles, textStyles } from './styles';
 import { buttonRecipe, headingRecipe, inputRecipe } from './recipes';
-import { fieldSlotRecipe, alertSlotRecipe, tabsSlotRecipe } from './slot-recipes';
+import { fieldSlotRecipe, alertSlotRecipe, tabsSlotRecipe, menuSlotRecipe } from './slot-recipes';
 
 const config = defineConfig({
   theme: {
@@ -18,6 +18,7 @@ const config = defineConfig({
       field: fieldSlotRecipe,
       alert: alertSlotRecipe,
       tabs: tabsSlotRecipe,
+      menu: menuSlotRecipe,
     },
   },
 });

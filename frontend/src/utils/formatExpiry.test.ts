@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { formatExpiry } from './FileRow';
+import { formatExpiry } from './formatExpiry';
 
 // Pin "today" to 2024-06-15 for all tests
 beforeEach(() => {

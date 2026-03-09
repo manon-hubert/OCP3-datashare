@@ -1,20 +1,8 @@
-import { Box, Button, Flex, Text } from '@chakra-ui/react';
-import { File as FileIcon, Trash2, ArrowRight } from 'lucide-react';
+import { Box, Button, Flex, IconButton, Menu, Portal, Text } from '@chakra-ui/react';
+import { File as FileIcon, Trash2, ArrowRight, MoreVertical } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { FileListItem, FileHistoryItem } from '../../api/files';
-
-export function formatExpiry(expiresAt: string): string {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const exp = new Date(expiresAt);
-  exp.setHours(0, 0, 0, 0);
-  const diffDays = Math.round((exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (diffDays < 0) return 'Expiré';
-  if (diffDays === 0) return "Expire aujourd'hui";
-  if (diffDays === 1) return 'Expire demain';
-  return `Expire dans ${diffDays} jours`;
-}
+import { formatExpiry } from '../../utils/formatExpiry';
 
 export type FileRowProps =
   | { kind: 'active'; file: FileListItem; onDelete: (id: string) => void }
@@ -63,21 +51,73 @@ export function FileRow(props: FileRowProps) {
           Ce fichier a expiré, il n&apos;est plus stocké chez nous
         </Text>
       ) : (
-        <Flex align="center" gap="3" flexShrink={0}>
-          {/*<Box color="#A89890">*/}
-          {/*  <Lock size={16} />*/}
-          {/*</Box>*/}
-          <Button variant="outline" size="sm" gap="2" onClick={() => props.onDelete(props.file.id)}>
-            <Trash2 size={14} />
-            Supprimer
-          </Button>
-          <Button asChild variant="outline" size="sm" gap="2">
-            <Link to={`/share/${props.file.downloadToken}`}>
-              Accéder
-              <ArrowRight size={14} />
-            </Link>
-          </Button>
-        </Flex>
+        <>
+          {/* Desktop buttons */}
+          <Flex align="center" gap="3" flexShrink={0} display={{ base: 'none', md: 'flex' }}>
+            <Button
+              variant="outline"
+              size="sm"
+              gap="2"
+              onClick={() => props.onDelete(props.file.id)}
+            >
+              <Trash2 size={14} />
+              Supprimer
+            </Button>
+            <Button asChild variant="outline" size="sm" gap="2">
+              <Link to={`/share/${props.file.downloadToken}`}>
+                Accéder
+                <ArrowRight size={14} />
+              </Link>
+            </Button>
+          </Flex>
+
+          {/* Mobile kebab menu */}
+          <Menu.Root>
+            <Menu.Trigger asChild>
+              <IconButton
+                aria-label="Actions"
+                variant="outline"
+                display={{ base: 'flex', md: 'none' }}
+                w="32px"
+                h="32px"
+                minW="32px"
+                p="8px"
+                borderColor="{colors.button.orangeLight}"
+                borderRadius="8px"
+                color="{colors.button.orange}"
+                _open={{
+                  bg: 'transparent',
+                  color: '{colors.button.orange}',
+                  borderColor: '{colors.button.orangeLight}',
+                }}
+              >
+                <MoreVertical size={16} />
+              </IconButton>
+            </Menu.Trigger>
+            <Portal>
+              <Menu.Positioner>
+                <Menu.Content bg="white" borderRadius="8px">
+                  <Menu.Item
+                    value="access"
+                    asChild
+                    color="black"
+                    _highlighted={{ bg: '{colors.fileRow.bg}' }}
+                  >
+                    <Link to={`/share/${props.file.downloadToken}`}>Accéder</Link>
+                  </Menu.Item>
+                  <Menu.Item
+                    value="delete"
+                    color="{colors.fileRow.expiredText}"
+                    _highlighted={{ bg: '{colors.fileRow.bg}' }}
+                    onClick={() => props.onDelete(props.file.id)}
+                  >
+                    Supprimer
+                  </Menu.Item>
+                </Menu.Content>
+              </Menu.Positioner>
+            </Portal>
+          </Menu.Root>
+        </>
       )}
     </Flex>
   );

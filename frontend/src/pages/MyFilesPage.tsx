@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Alert, Box, Flex, Heading, Spinner, Tabs, Text } from '@chakra-ui/react';
+import { Alert, Box, Button, Flex, Heading, Spinner, Tabs, Text } from '@chakra-ui/react';
 import {
   listFiles,
   listFileHistory,
@@ -8,6 +8,7 @@ import {
   type FileHistoryItem,
 } from '../api/files';
 import { FileRow } from '../components/dashboard/FileRow';
+import { useNavigate } from 'react-router-dom';
 
 type Tab = 'all' | 'active' | 'expired';
 
@@ -61,11 +62,23 @@ function MyFilesPage() {
         ? history.length === 0
         : files.length === 0;
 
+  const navigate = useNavigate();
+
   return (
     <Box>
-      <Heading as="h2" size="h2" mb="6">
-        Mes fichiers
-      </Heading>
+      <Flex direction="row" align="center" justify="space-between" mb="6">
+        <Heading as="h2" size="h2">
+          Mes fichiers
+        </Heading>
+        <Button
+          variant="solid"
+          size="sm"
+          display={{ base: 'flex', md: 'none' }}
+          onClick={() => navigate('/')}
+        >
+          Ajouter
+        </Button>
+      </Flex>
 
       <Tabs.Root
         value={tab}
