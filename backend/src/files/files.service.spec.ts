@@ -103,6 +103,18 @@ describe('FilesService', () => {
       expect(result).toBe(entity);
     });
 
+    it('saves to anonymous/{fileId} when userId is null', async () => {
+      mockFileTypeFromBuffer.mockResolvedValue({ mime: 'image/png', ext: 'png' });
+      const entity = { id: 'uuid-1', downloadToken: 'tok' };
+      filesRepository.create.mockReturnValue(entity);
+      filesRepository.save.mockResolvedValue(entity);
+      storageService.save.mockResolvedValue(undefined);
+
+      await service.upload(null, makeMulterFile());
+
+      expect(storageService.save).toHaveBeenCalledWith('anonymous/uuid-1', expect.any(Buffer));
+    });
+
     it('generates a 64-character hex downloadToken', async () => {
       mockFileTypeFromBuffer.mockResolvedValue({ mime: 'image/png', ext: 'png' });
       let capturedToken = '';
@@ -197,6 +209,20 @@ describe('FilesService', () => {
       expect(storageService.read).toHaveBeenCalledWith('users/42/uuid-1');
     });
 
+    it('reads from anonymous/{fileId} path when userId is null', async () => {
+      filesRepository.findOne.mockResolvedValue({
+        id: 'uuid-1',
+        userId: null,
+        originalName: 'f',
+        mimeType: 'image/png',
+      });
+      storageService.read.mockResolvedValue(Buffer.from(''));
+
+      await service.getBufferByToken('token-abc');
+
+      expect(storageService.read).toHaveBeenCalledWith('anonymous/uuid-1');
+    });
+
     it('throws NotFoundException with FILE_NOT_FOUND when the token does not exist', async () => {
       filesRepository.findOne.mockResolvedValue(null);
 
@@ -267,6 +293,51 @@ describe('FilesService', () => {
       await service.deleteFile(file);
 
       expect(storageService.delete).toHaveBeenCalledWith('users/42/uuid-1');
+    });
+
+    it('uses anonymous/{fileId} storage path for anonymous files', async () => {
+      const anonymousFile = {
+        id: 'uuid-1',
+        userId: null,
+        originalName: 'f.png',
+        mimeType: 'image/png',
+      } as FileEntity;
+      storageService.delete.mockResolvedValue(undefined);
+      filesRepository.delete.mockResolvedValue(undefined);
+
+      await service.deleteFile(anonymousFile);
+
+      expect(storageService.delete).toHaveBeenCalledWith('anonymous/uuid-1');
+    });
+
+    it('does not write to file_history for anonymous files', async () => {
+      const anonymousFile = {
+        id: 'uuid-1',
+        userId: null,
+        originalName: 'f.png',
+        mimeType: 'image/png',
+      } as FileEntity;
+      storageService.delete.mockResolvedValue(undefined);
+      filesRepository.delete.mockResolvedValue(undefined);
+
+      await service.deleteFile(anonymousFile);
+
+      expect(fileHistoryRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('still deletes from DB when skipping history for anonymous files', async () => {
+      const anonymousFile = {
+        id: 'uuid-1',
+        userId: null,
+        originalName: 'f.png',
+        mimeType: 'image/png',
+      } as FileEntity;
+      storageService.delete.mockResolvedValue(undefined);
+      filesRepository.delete.mockResolvedValue(undefined);
+
+      await service.deleteFile(anonymousFile);
+
+      expect(filesRepository.delete).toHaveBeenCalledWith('uuid-1');
     });
 
     it('records user_id, original_name, and mime_type in file_history', async () => {

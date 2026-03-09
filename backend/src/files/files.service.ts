@@ -26,7 +26,7 @@ export class FilesService {
     private readonly storageService: StorageService,
   ) {}
 
-  async upload(userId: number, file: Express.Multer.File): Promise<FileEntity> {
+  async upload(userId: number | null, file: Express.Multer.File): Promise<FileEntity> {
     const { fileTypeFromBuffer } = await import('file-type');
     const detected = await fileTypeFromBuffer(file.buffer);
     const mimeType = detected?.mime ?? 'application/octet-stream';
@@ -49,8 +49,9 @@ export class FilesService {
 
     await this.filesRepository.save(fileEntity);
 
+    const storagePath = userId ? `users/${userId}/${fileEntity.id}` : `anonymous/${fileEntity.id}`;
     try {
-      await this.storageService.save(`users/${userId}/${fileEntity.id}`, file.buffer);
+      await this.storageService.save(storagePath, file.buffer);
     } catch (err) {
       await this.filesRepository.delete(fileEntity.id);
       throw err;
@@ -119,14 +120,16 @@ export class FilesService {
       // Storage cleanup failure is non-critical after DB deletion
     }
 
-    await this.fileHistoryRepository.save(
-      this.fileHistoryRepository.create({
-        id: file.id,
-        userId: file.userId,
-        originalName: file.originalName,
-        mimeType: file.mimeType,
-      }),
-    );
+    if (file.userId !== null) {
+      await this.fileHistoryRepository.save(
+        this.fileHistoryRepository.create({
+          id: file.id,
+          userId: file.userId,
+          originalName: file.originalName,
+          mimeType: file.mimeType,
+        }),
+      );
+    }
 
     await this.filesRepository.delete(file.id);
   }

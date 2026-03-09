@@ -21,6 +21,7 @@ import { FilesService } from './files.service';
 import { FileEntity } from './entities/file.entity';
 import { FileHistoryEntity } from './entities/file-history.entity';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 import { CurrentUser, type JwtPayload } from '../common/decorators/current-user.decorator';
 import { FileSizePipe } from '../common/pipes/file-size.pipe';
 import { ListFilesQueryDto } from './dto/list-files-query.dto';
@@ -32,7 +33,7 @@ export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
   @ApiConsumes('multipart/form-data')
@@ -45,11 +46,10 @@ export class FilesController {
   })
   @ApiOperation({ summary: 'Upload a file' })
   @ApiResponse({ status: 201, description: 'File uploaded successfully', type: FileEntity })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 413, description: 'File exceeds the size limit' })
   @ApiResponse({ status: 415, description: 'File type not allowed' })
-  async upload(@CurrentUser() user: JwtPayload, @UploadedFile(FileSizePipe) file: any) {
-    return this.filesService.upload(user.sub, file);
+  async upload(@CurrentUser() user: JwtPayload | undefined, @UploadedFile(FileSizePipe) file: any) {
+    return this.filesService.upload(user?.sub ?? null, file);
   }
 
   @Get()

@@ -103,6 +103,7 @@ describe('Files (integration)', () => {
   afterEach(async () => {
     await filesRepository.delete({ userId });
     await fileHistoryRepository.delete({ userId });
+    await filesRepository.createQueryBuilder().delete().where('userId IS NULL').execute();
   });
 
   describe('POST /files', () => {
@@ -124,11 +125,29 @@ describe('Files (integration)', () => {
       expect(res.body.userId).toBeUndefined(); // excluded by @Exclude()
     });
 
-    it('returns 401 when no token is provided', async () => {
-      await request(app.getHttpServer())
+    it('returns 201 with file metadata when no auth token is provided', async () => {
+      const res = await request(app.getHttpServer())
         .post('/files')
-        .attach('file', SMALL_PNG, { filename: 'photo.png' })
-        .expect(401);
+        .attach('file', SMALL_PNG, { filename: 'photo.png', contentType: 'image/png' })
+        .expect(201);
+
+      expect(res.body).toMatchObject({
+        originalName: 'photo.png',
+        mimeType: 'image/png',
+        size: SMALL_PNG.length,
+        downloadToken: expect.stringMatching(/^[0-9a-f]{64}$/),
+        createdAt: expect.any(String),
+      });
+      expect(res.body.userId).toBeUndefined();
+    });
+
+    it('stores an anonymous file at anonymous/{fileId} on disk', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/files')
+        .attach('file', SMALL_PNG, { filename: 'photo.png', contentType: 'image/png' });
+      const fileId = res.body.id as string;
+
+      await expect(storageService.read(`anonymous/${fileId}`)).resolves.toEqual(SMALL_PNG);
     });
 
     it('returns 413 with FILE_TOO_LARGE when the file exceeds the size limit', async () => {
@@ -200,6 +219,25 @@ describe('Files (integration)', () => {
         },
       });
     });
+
+    it('returns 200 with metadata for a token from an anonymous upload', async () => {
+      const uploadRes = await request(app.getHttpServer())
+        .post('/files')
+        .attach('file', SMALL_PNG, { filename: 'anon.png', contentType: 'image/png' });
+      const anonToken = uploadRes.body.downloadToken as string;
+
+      const res = await request(app.getHttpServer())
+        .get(`/files/download/${anonToken}`)
+        .expect(200);
+
+      expect(res.body).toMatchObject({
+        originalName: 'anon.png',
+        mimeType: 'image/png',
+        size: SMALL_PNG.length,
+        createdAt: expect.any(String),
+      });
+      expect(res.body.userId).toBeUndefined();
+    });
   });
 
   describe('GET /files/download/:token/content', () => {
@@ -243,6 +281,42 @@ describe('Files (integration)', () => {
 
       const res = await request(app.getHttpServer())
         .get(`/files/download/${downloadToken}/content`)
+        .expect(410);
+
+      expect(res.body).toEqual({
+        error: {
+          code: ErrorCode.FILE_GONE,
+          message: ErrorMessage[ErrorCode.FILE_GONE],
+        },
+      });
+    });
+
+    it('returns 200 with correct headers and body for an anonymous upload', async () => {
+      const uploadRes = await request(app.getHttpServer())
+        .post('/files')
+        .attach('file', SMALL_PNG, { filename: 'anon.png', contentType: 'image/png' });
+      const anonToken = uploadRes.body.downloadToken as string;
+
+      const res = await request(app.getHttpServer())
+        .get(`/files/download/${anonToken}/content`)
+        .expect(200);
+
+      expect(res.headers['content-type']).toMatch(/image\/png/);
+      expect(res.headers['content-disposition']).toContain('anon.png');
+      expect(parseInt(res.headers['content-length'])).toBe(SMALL_PNG.length);
+    });
+
+    it('returns 410 with FILE_GONE when an anonymous file is deleted from disk', async () => {
+      const uploadRes = await request(app.getHttpServer())
+        .post('/files')
+        .attach('file', SMALL_PNG, { filename: 'anon.png', contentType: 'image/png' });
+      const anonToken = uploadRes.body.downloadToken as string;
+      const anonFileId = uploadRes.body.id as string;
+
+      await storageService.delete(`anonymous/${anonFileId}`);
+
+      const res = await request(app.getHttpServer())
+        .get(`/files/download/${anonToken}/content`)
         .expect(410);
 
       expect(res.body).toEqual({
