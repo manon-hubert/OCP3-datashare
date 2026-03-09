@@ -32,96 +32,99 @@ const UploadForm = ({
   });
 
   return (
-    <Box
-      as="form"
-      onSubmit={onSubmit}
-      noValidate
-      layerStyle="card"
-      width="100%"
-      maxW={{ base: '100%', md: '400px' }}
-      borderRadius={{ base: '16px 16px 0px 0px', md: '16px' }}
-      position={{ base: 'fixed', md: 'static' }}
-      bottom={{ base: '0', md: 'auto' }}
-      left={{ base: '0', md: 'auto' }}
-      right={{ base: '0', md: 'auto' }}
-    >
-      <Stack gap="6">
-        <Heading as="h2" size="h2" textAlign="center" m="0">
-          Ajouter un fichier
-        </Heading>
+    <form onSubmit={onSubmit} noValidate style={{ width: '100%' }}>
+      <Box
+        layerStyle="card"
+        width="100%"
+        maxW={{ base: '100%', md: '400px' }}
+        mx="auto"
+        borderRadius={{ base: '16px 16px 0px 0px', md: '16px' }}
+        position={{ base: 'fixed', md: 'static' }}
+        bottom={{ base: '0', md: 'auto' }}
+        left={{ base: '0', md: 'auto' }}
+        right={{ base: '0', md: 'auto' }}
+      >
+        <Stack gap="6">
+          <Heading as="h2" textStyle="h2" textAlign="center" m="0">
+            Ajouter un fichier
+          </Heading>
 
-        <Stack gap="1">
-          <Flex direction="row" align="center" gap="4" h="56px" alignSelf="stretch">
-            <Flex direction="row" align="center" p="2" gap="4" flex="1" h="56px" minW={0}>
-              <Box flexShrink={0} w="24px" h="24px" color="form.darkText">
-                <FilePlus size={24} />
-              </Box>
-              <Flex
-                direction="column"
-                justify="center"
-                align="flex-start"
-                flex="1"
-                h="40px"
-                minW={0}
-              >
-                <Text
-                  textStyle="normal"
-                  color="form.darkText"
-                  overflow="hidden"
-                  whiteSpace="nowrap"
-                  textOverflow="ellipsis"
-                  w="100%"
+          <Stack gap="1">
+            <Flex direction="row" align="center" gap="4" h="56px" alignSelf="stretch">
+              <Flex direction="row" align="center" p="2" gap="4" flex="1" h="56px" minW={0}>
+                <Box flexShrink={0} w="24px" h="24px" color="form.darkText">
+                  <FilePlus size={24} />
+                </Box>
+                <Flex
+                  direction="column"
+                  justify="center"
+                  align="flex-start"
+                  flex="1"
+                  h="40px"
+                  minW={0}
                 >
-                  {file.name}
-                </Text>
-                <Text textStyle="small" color={fileSizeError ? 'form.errorText' : 'form.darkText'}>
-                  <FormatByte value={file.size} unitDisplay="short" unitSystem="decimal" />
-                </Text>
+                  <Text
+                    textStyle="normal"
+                    color="form.darkText"
+                    overflow="hidden"
+                    whiteSpace="nowrap"
+                    textOverflow="ellipsis"
+                    w="100%"
+                  >
+                    {file.name}
+                  </Text>
+                  <Text
+                    textStyle="small"
+                    color={fileSizeError ? 'form.errorText' : 'form.darkText'}
+                  >
+                    <FormatByte value={file.size} unitDisplay="short" unitSystem="decimal" />
+                  </Text>
+                </Flex>
               </Flex>
+
+              <Button
+                variant="outline"
+                size="sm"
+                h="32px"
+                type="button"
+                onClick={onChangeFile}
+                flexShrink={0}
+              >
+                Changer
+              </Button>
             </Flex>
 
-            <Button
-              variant="outline"
-              size="sm"
-              h="32px"
-              type="button"
-              onClick={onChangeFile}
-              flexShrink={0}
-            >
-              Changer
-            </Button>
-          </Flex>
+            {fileSizeError && (
+              <Text textStyle="normal" color="form.errorText">
+                La taille des fichiers est limitée à{' '}
+                <FormatByte
+                  value={Number(import.meta.env.VITE_MAX_FILE_SIZE)}
+                  unitDisplay="short"
+                  unitSystem="decimal"
+                />
+              </Text>
+            )}
+          </Stack>
 
-          {fileSizeError && (
-            <Text textStyle="normal" color="form.errorText">
-              La taille des fichiers est limitée à{' '}
-              <FormatByte
-                value={Number(import.meta.env.VITE_MAX_FILE_SIZE)}
-                unitDisplay="short"
-                unitSystem="decimal"
-              />
-            </Text>
+          {uploadError && (
+            <Alert.Root status="error" size="sm">
+              <Alert.Indicator />
+              <Alert.Title>{uploadError}</Alert.Title>
+            </Alert.Root>
           )}
+
+          <Button
+            variant="surface"
+            type="submit"
+            disabled={fileSizeError || isUploading}
+            loading={isUploading}
+          >
+            <CloudUpload />
+            Téléverser
+          </Button>
         </Stack>
-
-        {uploadError && (
-          <Alert.Root status="error" size="sm">
-            <Alert.Indicator />
-            <Alert.Title>{uploadError}</Alert.Title>
-          </Alert.Root>
-        )}
-
-        <Button
-          variant="surface"
-          type="submit"
-          disabled={fileSizeError || isUploading}
-          loading={isUploading}
-        >
-          <CloudUpload />
-          Téléverser
-        </Button>
-      </Stack>
-    </Box>
+      </Box>
+    </form>
   );
 };
 

@@ -48,7 +48,7 @@ const DownloadCard = ({ fileInfo, token }: DownloadCardProps) => {
   return (
     <Box layerStyle="card" width="100%" maxW="640px">
       <Stack gap="6">
-        <Heading as="h2" size="h2" textAlign="center" m="0">
+        <Heading as="h2" textStyle="h2" textAlign="center" m="0">
           Télécharger un fichier
         </Heading>
 

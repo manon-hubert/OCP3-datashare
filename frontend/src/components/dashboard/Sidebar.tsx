@@ -49,7 +49,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
         </IconButton>
         <Heading
           as="h1"
-          size="h1"
+          textStyle="h1"
           color="white"
           alignSelf={{ base: 'auto', md: 'stretch' }}
           textAlign="left"

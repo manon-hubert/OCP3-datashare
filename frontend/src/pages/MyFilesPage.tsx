@@ -67,7 +67,7 @@ function MyFilesPage() {
   return (
     <Box>
       <Flex direction="row" align="center" justify="space-between" mb="6">
-        <Heading as="h2" size="h2">
+        <Heading as="h2" textStyle="h2">
           Mes fichiers
         </Heading>
         <Button
