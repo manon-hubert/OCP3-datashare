@@ -101,14 +101,14 @@ export function FileRow(props: FileRowProps) {
                     value="access"
                     asChild
                     color="black"
-                    _highlighted={{ bg: '{colors.fileRow.bg}' }}
+                    _highlighted={{ bg: '{colors.dashboard.header.bg}', borderRadius: '8px' }}
                   >
                     <Link to={`/share/${props.file.downloadToken}`}>Accéder</Link>
                   </Menu.Item>
                   <Menu.Item
                     value="delete"
                     color="{colors.fileRow.expiredText}"
-                    _highlighted={{ bg: '{colors.fileRow.bg}' }}
+                    _highlighted={{ bg: '{colors.dashboard.header.bg}', borderRadius: '8px' }}
                     onClick={() => props.onDelete(props.file.id)}
                   >
                     Supprimer

@@ -55,10 +55,10 @@ const UploadSuccessCard = ({ uploadedFile }: UploadSuccessCardProps) => {
             px="4"
             py="2"
             gap="10px"
-            bg="form.urlBg"
+            bg="form.linkBg"
             borderRadius="8px"
             borderWidth="1px"
-            borderColor="form.urlBorder"
+            borderColor="form.linkBorder"
           >
             <Text
               textStyle="normal"

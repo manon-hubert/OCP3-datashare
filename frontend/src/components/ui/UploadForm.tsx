@@ -105,7 +105,7 @@ const UploadForm = ({
         </Stack>
 
         {uploadError && (
-          <Alert.Root status="error">
+          <Alert.Root status="error" size="sm">
             <Alert.Indicator />
             <Alert.Title>{uploadError}</Alert.Title>
           </Alert.Root>

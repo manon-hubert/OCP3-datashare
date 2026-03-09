@@ -6,9 +6,6 @@ export const menuSlotRecipe = defineSlotRecipe({
     item: {
       fontFamily: 'DM Sans Variable',
       fontWeight: '400',
-      _highlighted: {
-        fontWeight: '600',
-      },
     },
   },
   variants: {

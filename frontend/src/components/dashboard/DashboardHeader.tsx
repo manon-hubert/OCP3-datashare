@@ -1,4 +1,4 @@
-import { Button, Flex, IconButton } from '@chakra-ui/react';
+import { Box, Button, Flex, IconButton } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Menu } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext.tsx';
@@ -53,7 +53,7 @@ function DashboardHeader({ onToggleSidebar }: DashboardHeaderProps) {
           </Button>
           <Button variant="ghost" size="sm" onClick={logout} gap="2">
             <LogOut size={16} />
-            Déconnexion
+            <Box display={{ base: 'none', md: 'inline' }}>Déconnexion</Box>
           </Button>
         </Flex>
       </Flex>

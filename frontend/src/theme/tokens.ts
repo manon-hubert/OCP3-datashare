@@ -27,8 +27,8 @@ export const tokens = {
       lightBorder: { value: '#D9D9D9' },
       errorText: { value: '#F14343' },
       linkText: { value: '#D8640B' },
-      urlBg: { value: 'rgba(255, 94, 0, 0.03)' },
-      urlBorder: { value: 'rgba(215, 99, 11, 0.2)' },
+      linkBg: { value: 'rgba(255, 94, 0, 0.03)' },
+      linkBorder: { value: 'rgba(215, 99, 11, 0.2)' },
     },
     dashboard: {
       header: {
