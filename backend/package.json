@@ -19,7 +19,11 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-integration.json",
     "test:integration:cov": "NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-integration.json --coverage",
-    "test:cov:all": "NODE_OPTIONS=--experimental-vm-modules jest --config ./jest.all.json"
+    "test:cov:all": "NODE_OPTIONS=--experimental-vm-modules jest --config ./jest.all.json",
+    "typeorm": "TS_NODE_PROJECT=tsconfig.migration.json typeorm-ts-node-commonjs",
+    "migration:generate": "npm run typeorm -- migration:generate -d src/data-source.ts",
+    "migration:run": "npm run typeorm -- migration:run -d src/data-source.ts",
+    "migration:revert": "npm run typeorm -- migration:revert -d src/data-source.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
