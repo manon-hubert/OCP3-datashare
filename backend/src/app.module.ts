@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { FilesModule } from './files/files.module';
@@ -39,6 +40,7 @@ import { FilesModule } from './files/files.module';
       }),
       inject: [ConfigService],
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     FilesModule,
   ],

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FilesService } from './files.service';
+import { FilesCleanupService } from './files-cleanup.service';
 import { FilesController } from './files.controller';
 import { FileEntity } from './entities/file.entity';
 import { FileHistoryEntity } from './entities/file-history.entity';
@@ -14,6 +15,13 @@ import { FileOwnerGuard } from './guards/file-owner.guard';
 @Module({
   imports: [TypeOrmModule.forFeature([FileEntity, FileHistoryEntity]), StorageModule, AuthModule],
   controllers: [FilesController],
-  providers: [FilesService, JwtAuthGuard, OptionalJwtAuthGuard, FileSizePipe, FileOwnerGuard],
+  providers: [
+    FilesService,
+    FilesCleanupService,
+    JwtAuthGuard,
+    OptionalJwtAuthGuard,
+    FileSizePipe,
+    FileOwnerGuard,
+  ],
 })
 export class FilesModule {}

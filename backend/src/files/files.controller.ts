@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -25,6 +26,7 @@ import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 import { CurrentUser, type JwtPayload } from '../common/decorators/current-user.decorator';
 import { FileSizePipe } from '../common/pipes/file-size.pipe';
 import { ListFilesQueryDto } from './dto/list-files-query.dto';
+import { UploadFileDto } from './dto/upload-file.dto';
 import { FileOwnerGuard } from './guards/file-owner.guard';
 
 @ApiTags('files')
@@ -40,7 +42,10 @@ export class FilesController {
   @ApiBody({
     schema: {
       type: 'object',
-      properties: { file: { type: 'string', format: 'binary' } },
+      properties: {
+        file: { type: 'string', format: 'binary' },
+        expiresIn: { type: 'integer', minimum: 1, maximum: 30, default: 7 },
+      },
       required: ['file'],
     },
   })
@@ -48,8 +53,12 @@ export class FilesController {
   @ApiResponse({ status: 201, description: 'File uploaded successfully', type: FileEntity })
   @ApiResponse({ status: 413, description: 'File exceeds the size limit' })
   @ApiResponse({ status: 415, description: 'File type not allowed' })
-  async upload(@CurrentUser() user: JwtPayload | undefined, @UploadedFile(FileSizePipe) file: any) {
-    return this.filesService.upload(user?.sub ?? null, file);
+  async upload(
+    @CurrentUser() user: JwtPayload | undefined,
+    @UploadedFile(FileSizePipe) file: any,
+    @Body() body: UploadFileDto,
+  ) {
+    return this.filesService.upload(user?.sub ?? null, file, body.expiresIn);
   }
 
   @Get()

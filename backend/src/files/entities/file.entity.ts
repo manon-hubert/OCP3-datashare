@@ -34,4 +34,8 @@ export class FileEntity {
   @ApiProperty()
   @CreateDateColumn()
   createdAt: Date;
+
+  @ApiProperty()
+  @Column({ type: 'timestamptz' })
+  expiresAt: Date;
 }

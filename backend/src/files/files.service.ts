@@ -5,7 +5,7 @@ import {
   UnsupportedMediaTypeException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, Repository } from 'typeorm';
 import * as crypto from 'node:crypto';
 import { FileEntity } from './entities/file.entity';
 import { FileHistoryEntity } from './entities/file-history.entity';
@@ -13,8 +13,7 @@ import { StorageService } from '../storage/storage.service';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime-types';
 import { ErrorCode, ErrorMessage } from '../common/constants/error-codes';
 import { FileFilter } from './dto/list-files-query.dto';
-
-const FILE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+import { DEFAULT_EXPIRY_DAYS } from './dto/upload-file.dto';
 
 @Injectable()
 export class FilesService {
@@ -26,7 +25,11 @@ export class FilesService {
     private readonly storageService: StorageService,
   ) {}
 
-  async upload(userId: number | null, file: Express.Multer.File): Promise<FileEntity> {
+  async upload(
+    userId: number | null,
+    file: Express.Multer.File,
+    expiresIn: number = DEFAULT_EXPIRY_DAYS,
+  ): Promise<FileEntity> {
     const { fileTypeFromBuffer } = await import('file-type');
     const detected = await fileTypeFromBuffer(file.buffer);
     const mimeType = detected?.mime ?? 'application/octet-stream';
@@ -38,6 +41,9 @@ export class FilesService {
       });
     }
 
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + expiresIn);
+
     const downloadToken = crypto.randomBytes(32).toString('hex');
     const fileEntity = this.filesRepository.create({
       userId,
@@ -45,6 +51,7 @@ export class FilesService {
       mimeType,
       size: file.size,
       downloadToken,
+      expiresAt,
     });
 
     await this.filesRepository.save(fileEntity);
@@ -62,7 +69,7 @@ export class FilesService {
 
   async getInfoByToken(
     token: string,
-  ): Promise<Pick<FileEntity, 'originalName' | 'mimeType' | 'size' | 'createdAt'>> {
+  ): Promise<Pick<FileEntity, 'originalName' | 'mimeType' | 'size' | 'createdAt' | 'expiresAt'>> {
     const file = await this.filesRepository.findOne({ where: { downloadToken: token } });
     if (!file) {
       throw new NotFoundException({
@@ -70,16 +77,23 @@ export class FilesService {
         message: ErrorMessage[ErrorCode.FILE_NOT_FOUND],
       });
     }
+    if (file.expiresAt <= new Date()) {
+      throw new GoneException({
+        code: ErrorCode.FILE_GONE,
+        message: ErrorMessage[ErrorCode.FILE_GONE],
+      });
+    }
     return {
       originalName: file.originalName,
       mimeType: file.mimeType,
       size: file.size,
       createdAt: file.createdAt,
+      expiresAt: file.expiresAt,
     };
   }
 
   async listUserFiles(userId: number, filter: FileFilter) {
-    const cutoff = new Date(Date.now() - FILE_TTL_MS);
+    const now = new Date();
 
     const qb = this.filesRepository
       .createQueryBuilder('file')
@@ -87,9 +101,9 @@ export class FilesService {
       .orderBy('file.createdAt', 'DESC');
 
     if (filter === FileFilter.ACTIVE) {
-      qb.andWhere('file.createdAt > :cutoff', { cutoff });
+      qb.andWhere('file.expiresAt > :now', { now });
     } else if (filter === FileFilter.EXPIRED) {
-      qb.andWhere('file.createdAt <= :cutoff', { cutoff });
+      qb.andWhere('file.expiresAt <= :now', { now });
     }
 
     const files = await qb.getMany();
@@ -101,8 +115,15 @@ export class FilesService {
       size: file.size,
       downloadToken: file.downloadToken,
       createdAt: file.createdAt,
-      expiresAt: new Date(file.createdAt.getTime() + FILE_TTL_MS),
+      expiresAt: file.expiresAt,
     }));
+  }
+
+  async findExpiredFiles(limit = 100): Promise<FileEntity[]> {
+    return this.filesRepository.find({
+      where: { expiresAt: LessThanOrEqual(new Date()) },
+      take: limit,
+    });
   }
 
   async listUserHistory(userId: number): Promise<FileHistoryEntity[]> {
@@ -142,6 +163,12 @@ export class FilesService {
       throw new NotFoundException({
         code: ErrorCode.FILE_NOT_FOUND,
         message: ErrorMessage[ErrorCode.FILE_NOT_FOUND],
+      });
+    }
+    if (file.expiresAt <= new Date()) {
+      throw new GoneException({
+        code: ErrorCode.FILE_GONE,
+        message: ErrorMessage[ErrorCode.FILE_GONE],
       });
     }
     const storagePath = file.userId ? `users/${file.userId}/${file.id}` : `anonymous/${file.id}`;
