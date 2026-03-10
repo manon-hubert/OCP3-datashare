@@ -44,7 +44,7 @@ export class FilesController {
       type: 'object',
       properties: {
         file: { type: 'string', format: 'binary' },
-        expiresIn: { type: 'integer', minimum: 1, maximum: 30, default: 7 },
+        expiresIn: { type: 'integer', minimum: 1, maximum: 7, default: 7 },
       },
       required: ['file'],
     },

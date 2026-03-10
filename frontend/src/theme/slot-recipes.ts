@@ -1,5 +1,84 @@
 import { defineSlotRecipe } from '@chakra-ui/react';
 
+export const selectSlotRecipe = defineSlotRecipe({
+  slots: [
+    'root',
+    'label',
+    'control',
+    'trigger',
+    'valueText',
+    'indicator',
+    'content',
+    'item',
+    'itemText',
+  ],
+  base: {
+    root: {
+      gap: '8px',
+    },
+    label: {
+      color: '{colors.form.darkText}',
+      fontFamily: 'Inter Variable',
+      fontWeight: '400',
+      fontSize: '16px',
+      lineHeight: '24px',
+    },
+    trigger: {
+      padding: '12px 12px 12px 16px',
+      gap: '8px',
+      height: '40px',
+      background: 'transparent',
+      border: '1px solid',
+      borderColor: '{colors.form.lightBorder}',
+      borderRadius: '8px',
+    },
+    valueText: {
+      fontFamily: 'DM Sans Variable',
+      fontWeight: '400',
+      fontSize: '16px',
+      lineHeight: '16px',
+      color: '{colors.form.darkText}',
+    },
+    indicator: {
+      width: '16px',
+      height: '16px',
+      color: '{colors.form.darkText}',
+    },
+    content: {
+      gap: '4px',
+      background: 'white',
+      borderWidth: '1px',
+      borderColor: '{colors.form.lightBorder}',
+      borderRadius: '8px',
+    },
+    item: {
+      background: 'transparent',
+      _highlighted: {
+        background: '{colors.form.lightBorder}',
+      },
+    },
+    itemText: {
+      fontFamily: 'Inter Variable',
+      fontWeight: '400',
+      fontSize: '16px',
+      lineHeight: '16px',
+      color: '{colors.form.darkText}',
+    },
+  },
+  variants: {
+    variant: {
+      outline: {
+        trigger: {
+          borderColor: '{colors.form.lightBorder}',
+          _expanded: {
+            borderColor: '{colors.form.lightBorder}',
+          },
+        },
+      },
+    },
+  },
+});
+
 export const menuSlotRecipe = defineSlotRecipe({
   slots: ['item'],
   base: {

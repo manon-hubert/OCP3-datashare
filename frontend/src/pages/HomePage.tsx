@@ -13,6 +13,7 @@ const HomePage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | undefined>();
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
+  const [uploadedTtlDays, setUploadedTtlDays] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const openFilePicker = () => {
@@ -30,13 +31,14 @@ const HomePage = () => {
     e.target.value = '';
   };
 
-  const handleUpload = async () => {
+  const handleUpload = async (ttlDays: number) => {
     if (!selectedFile) return;
     setIsUploading(true);
     setUploadError(undefined);
     try {
-      const result = await uploadFile(selectedFile);
+      const result = await uploadFile(selectedFile, ttlDays);
       setUploadedFile(result);
+      setUploadedTtlDays(ttlDays);
       setSelectedFile(null);
     } catch (err) {
       const apiMessage =
@@ -53,7 +55,7 @@ const HomePage = () => {
 
   const renderContent = () => {
     if (uploadedFile) {
-      return <UploadSuccessCard uploadedFile={uploadedFile} />;
+      return <UploadSuccessCard uploadedFile={uploadedFile} ttlDays={uploadedTtlDays} />;
     }
     if (selectedFile) {
       return (

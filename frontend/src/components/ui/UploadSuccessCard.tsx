@@ -1,12 +1,14 @@
 import { Box, Button, Flex, FormatByte, Heading, Stack, Text } from '@chakra-ui/react';
 import { Copy, FilePlus } from 'lucide-react';
 import type { UploadedFile } from '../../api/files';
+import { TTL_OPTIONS } from '../../constants/ttl';
 
 interface UploadSuccessCardProps {
   uploadedFile: UploadedFile;
+  ttlDays: number;
 }
 
-const UploadSuccessCard = ({ uploadedFile }: UploadSuccessCardProps) => {
+const UploadSuccessCard = ({ uploadedFile, ttlDays }: UploadSuccessCardProps) => {
   const shareUrl = `${window.location.origin}/share/${uploadedFile.downloadToken}`;
 
   return (
@@ -48,7 +50,9 @@ const UploadSuccessCard = ({ uploadedFile }: UploadSuccessCardProps) => {
 
         <Stack gap="2">
           <Text textStyle="normal" color="form.darkText">
-            Félicitations, ton fichier sera conservé chez nous pendant une semaine !
+            Félicitations, ton fichier sera conservé chez nous pendant{' '}
+            {TTL_OPTIONS.find((o) => o.days === ttlDays)?.label.toLowerCase() ?? `${ttlDays} jours`}{' '}
+            !
           </Text>
           <Flex
             align="center"

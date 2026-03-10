@@ -10,6 +10,7 @@ export interface FileInfo {
   mimeType: string;
   size: number;
   createdAt: string;
+  expiresAt: string;
 }
 
 export async function getFileInfo(token: string): Promise<FileInfo> {
@@ -18,12 +19,13 @@ export async function getFileInfo(token: string): Promise<FileInfo> {
   return (await response.json()) as FileInfo;
 }
 
-export async function uploadFile(file: File): Promise<UploadedFile> {
+export async function uploadFile(file: File, expiresIn: number): Promise<UploadedFile> {
   const { data, error } = await apiClient.POST('/files', {
     body: { file: file as unknown as string },
     bodySerializer() {
       const form = new FormData();
       form.append('file', file);
+      form.append('expiresIn', String(expiresIn));
       return form;
     },
   });

@@ -2,33 +2,24 @@ import { Alert, Box, Button, Flex, FormatByte, Heading, Stack, Text } from '@cha
 import { CloudDownload, FileImage } from 'lucide-react';
 import type { FileInfo } from '../../api/files';
 
-const FILE_LIFETIME_DAYS = 7;
-
-function getExpiryAlert(createdAt: string): {
+function getExpiryAlert(expiresAt: string): {
   status: 'info' | 'warning' | 'error';
   message: string;
 } {
-  const expires = new Date(
-    new Date(createdAt).getTime() + FILE_LIFETIME_DAYS * 24 * 60 * 60 * 1000,
-  );
   const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
-  const expiryDay = new Date(expires.getFullYear(), expires.getMonth(), expires.getDate());
+  const expires = new Date(expiresAt);
+  const todayUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const expiryUtc = Date.UTC(expires.getFullYear(), expires.getMonth(), expires.getDate());
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const daysLeft = Math.round((expiryUtc - todayUtc) / msPerDay);
 
-  if (expiryDay < today) {
+  if (daysLeft < 0)
     return {
       status: 'error',
       message: "Ce fichier n'est plus disponible en téléchargement car il a expiré",
     };
-  }
-  if (expiryDay.getTime() === today.getTime()) {
-    return { status: 'warning', message: 'Ce fichier expirera ce soir' };
-  }
-  if (expiryDay.getTime() === tomorrow.getTime()) {
-    return { status: 'warning', message: 'Ce fichier expirera demain' };
-  }
-  const daysLeft = Math.round((expiryDay.getTime() - today.getTime()) / (24 * 60 * 60 * 1000));
+  if (daysLeft === 0) return { status: 'warning', message: 'Ce fichier expirera ce soir' };
+  if (daysLeft === 1) return { status: 'warning', message: 'Ce fichier expirera demain' };
   return { status: 'info', message: `Ce fichier expirera dans ${daysLeft} jours` };
 }
 
@@ -38,7 +29,7 @@ interface DownloadCardProps {
 }
 
 const DownloadCard = ({ fileInfo, token }: DownloadCardProps) => {
-  const expiry = fileInfo ? getExpiryAlert(fileInfo.createdAt) : null;
+  const expiry = fileInfo ? getExpiryAlert(fileInfo.expiresAt) : null;
   const status = expiry?.status ?? 'error';
   const message =
     expiry?.message ?? "Ce fichier n'est plus disponible en téléchargement car il a expiré";

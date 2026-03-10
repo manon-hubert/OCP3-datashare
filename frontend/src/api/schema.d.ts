@@ -146,19 +146,10 @@ export interface components {
       downloadToken: string;
       /** Format: date-time */
       createdAt: string;
-    };
-    FileListItem: {
-      id: string;
-      originalName: string;
-      mimeType: string;
-      size: number;
-      downloadToken: string;
-      /** Format: date-time */
-      createdAt: string;
       /** Format: date-time */
       expiresAt: string;
     };
-    FileHistoryItem: {
+    FileHistoryEntity: {
       id: string;
       originalName: string;
       mimeType: string;
@@ -215,13 +206,30 @@ export interface operations {
       /** @description Login successful */
       200: {
         headers: Record<string, unknown>;
-        content: {
-          'application/json': {
-            access_token: string;
-          };
-        };
+        content?: never;
       };
       /** @description Invalid credentials */
+      401: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+    };
+  };
+  FilesController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of files */
+      200: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+      /** @description Unauthorized */
       401: {
         headers: Record<string, unknown>;
         content?: never;
@@ -240,6 +248,8 @@ export interface operations {
         'multipart/form-data': {
           /** Format: binary */
           file: string;
+          /** @default 7 */
+          expiresIn?: number;
         };
       };
     };
@@ -251,11 +261,6 @@ export interface operations {
           'application/json': components['schemas']['FileEntity'];
         };
       };
-      /** @description Unauthorized */
-      401: {
-        headers: Record<string, unknown>;
-        content?: never;
-      };
       /** @description File exceeds the size limit */
       413: {
         headers: Record<string, unknown>;
@@ -263,31 +268,6 @@ export interface operations {
       };
       /** @description File type not allowed */
       415: {
-        headers: Record<string, unknown>;
-        content?: never;
-      };
-    };
-  };
-  FilesController_list: {
-    parameters: {
-      query?: {
-        filter?: 'all' | 'active' | 'expired';
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description List of files */
-      200: {
-        headers: Record<string, unknown>;
-        content: {
-          'application/json': components['schemas']['FileListItem'][];
-        };
-      };
-      /** @description Unauthorized */
-      401: {
         headers: Record<string, unknown>;
         content?: never;
       };
@@ -306,7 +286,7 @@ export interface operations {
       200: {
         headers: Record<string, unknown>;
         content: {
-          'application/json': components['schemas']['FileHistoryItem'][];
+          'application/json': components['schemas']['FileHistoryEntity'][];
         };
       };
       /** @description Unauthorized */
@@ -320,9 +300,7 @@ export interface operations {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        id: string;
-      };
+      path?: never;
       cookie?: never;
     };
     requestBody?: never;

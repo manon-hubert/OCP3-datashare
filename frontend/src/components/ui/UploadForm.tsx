@@ -1,9 +1,26 @@
-import { Alert, Box, Button, Flex, FormatByte, Heading, Stack, Text } from '@chakra-ui/react';
+import {
+  Alert,
+  Box,
+  Button,
+  Flex,
+  FormatByte,
+  Heading,
+  Select,
+  Stack,
+  Text,
+  createListCollection,
+} from '@chakra-ui/react';
 import { CloudUpload, FilePlus } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import { TTL_OPTIONS } from '../../constants/ttl.ts';
+
+const ttlCollection = createListCollection({
+  items: TTL_OPTIONS.map(({ days, label }) => ({ value: String(days), label })),
+});
 
 interface UploadFormData {
   fileName: string;
+  ttlDays: string;
 }
 
 interface UploadFormProps {
@@ -12,7 +29,7 @@ interface UploadFormProps {
   isUploading?: boolean;
   uploadError?: string;
   onChangeFile: () => void;
-  onUpload: () => void;
+  onUpload: (ttlDays: number) => void;
 }
 
 const UploadForm = ({
@@ -23,12 +40,12 @@ const UploadForm = ({
   onChangeFile,
   onUpload,
 }: UploadFormProps) => {
-  const { handleSubmit } = useForm<UploadFormData>({
-    defaultValues: { fileName: file.name },
+  const { handleSubmit, control } = useForm<UploadFormData>({
+    defaultValues: { fileName: file.name, ttlDays: '1' },
   });
 
-  const onSubmit = handleSubmit(() => {
-    onUpload();
+  const onSubmit = handleSubmit(({ ttlDays }) => {
+    onUpload(Number(ttlDays));
   });
 
   return (
@@ -105,6 +122,39 @@ const UploadForm = ({
               </Text>
             )}
           </Stack>
+
+          <Controller
+            control={control}
+            name="ttlDays"
+            render={({ field }) => (
+              <Select.Root
+                collection={ttlCollection}
+                value={[field.value]}
+                onValueChange={({ value }) => field.onChange(value[0])}
+                onInteractOutside={() => field.onBlur()}
+              >
+                <Select.HiddenSelect />
+                <Select.Label>Expiration</Select.Label>
+                <Select.Control>
+                  <Select.Trigger>
+                    <Select.ValueText />
+                  </Select.Trigger>
+                  <Select.IndicatorGroup>
+                    <Select.Indicator />
+                  </Select.IndicatorGroup>
+                </Select.Control>
+                <Select.Positioner>
+                  <Select.Content>
+                    {ttlCollection.items.map((item) => (
+                      <Select.Item key={item.value} item={item}>
+                        <Select.ItemText>{item.label}</Select.ItemText>
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Positioner>
+              </Select.Root>
+            )}
+          />
 
           {uploadError && (
             <Alert.Root status="error" size="sm">
