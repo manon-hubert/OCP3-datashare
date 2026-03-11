@@ -33,8 +33,11 @@ function MyFilesPage() {
         .catch(() => setError('Impossible de charger les fichiers.'))
         .finally(() => setLoading(false));
     } else if (tab === 'expired') {
-      listFileHistory()
-        .then(setHistory)
+      Promise.all([listFiles('expired'), listFileHistory()])
+        .then(([f, h]) => {
+          setFiles(f);
+          setHistory(h);
+        })
         .catch(() => setError("Impossible de charger l'historique."))
         .finally(() => setLoading(false));
     } else {
