@@ -35,6 +35,6 @@
     }
   ],
   "collectCoverage": true,
-  "collectCoverageFrom": ["src/**/*.(t|j)s"],
+  "collectCoverageFrom": ["src/**/*.(t|j)s", "!src/**/migrations/**"],
   "coverageDirectory": "coverage/all"
 }

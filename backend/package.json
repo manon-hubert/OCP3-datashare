@@ -90,7 +90,8 @@
       "^file-type$": "<rootDir>/__mocks__/file-type.ts"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!**/migrations/**"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
