@@ -15,7 +15,14 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Response } from 'express';
 import { memoryStorage } from 'multer';
 import { FilesService } from './files.service';
@@ -26,6 +33,7 @@ import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 import { CurrentUser, type JwtPayload } from '../common/decorators/current-user.decorator';
 import { FileSizePipe } from '../common/pipes/file-size.pipe';
 import { ListFilesQueryDto } from './dto/list-files-query.dto';
+import { FileInfoDto } from './dto/file-info.dto';
 import { UploadFileDto } from './dto/upload-file.dto';
 import { FileOwnerGuard } from './guards/file-owner.guard';
 
@@ -64,7 +72,7 @@ export class FilesController {
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'List files for authenticated user' })
-  @ApiResponse({ status: 200, description: 'List of files' })
+  @ApiResponse({ status: 200, description: 'List of files', type: [FileEntity] })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async list(@CurrentUser() user: JwtPayload, @Query() query: ListFilesQueryDto) {
     return this.filesService.listUserFiles(user.sub, query.filter!);
@@ -83,6 +91,7 @@ export class FilesController {
   @UseGuards(JwtAuthGuard, FileOwnerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a file' })
+  @ApiParam({ name: 'id', type: String })
   @ApiResponse({ status: 204, description: 'File deleted' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -93,7 +102,7 @@ export class FilesController {
 
   @Get('download/:token')
   @ApiOperation({ summary: 'Get file metadata by download token' })
-  @ApiResponse({ status: 200, description: 'File metadata' })
+  @ApiResponse({ status: 200, description: 'File metadata', type: FileInfoDto })
   @ApiResponse({ status: 404, description: 'File not found' })
   async getInfo(@Param('token') token: string) {
     return this.filesService.getInfoByToken(token);
