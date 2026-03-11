@@ -18,7 +18,7 @@ describe('request middleware', () => {
     localStorage.setItem('access_token', 'my-token');
     const fetchMock = stubFetch(new Response('[]', { status: 200 }));
 
-    await apiClient.GET('/files', { params: { query: { filter: 'all' } } });
+    await apiClient.GET('/files', {});
 
     const req = fetchMock.mock.calls[0][0] as Request;
     expect(req.headers.get('Authorization')).toBe('Bearer my-token');
@@ -27,7 +27,7 @@ describe('request middleware', () => {
   it('omits Authorization header when no token in localStorage', async () => {
     const fetchMock = stubFetch(new Response('[]', { status: 200 }));
 
-    await apiClient.GET('/files', { params: { query: { filter: 'all' } } });
+    await apiClient.GET('/files', {});
 
     const req = fetchMock.mock.calls[0][0] as Request;
     expect(req.headers.get('Authorization')).toBeNull();
@@ -40,7 +40,7 @@ describe('response middleware', () => {
     setUnauthorizedHandler(handler);
     stubFetch(new Response('{}', { status: 401 }));
 
-    await apiClient.GET('/files', { params: { query: { filter: 'all' } } });
+    await apiClient.GET('/files', {});
 
     expect(handler).toHaveBeenCalledOnce();
   });
