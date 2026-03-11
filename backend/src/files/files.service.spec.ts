@@ -28,9 +28,11 @@ describe('FilesService', () => {
   let service: FilesService;
   let filesRepository: {
     findOne: jest.Mock;
+    find: jest.Mock;
     create: jest.Mock;
     save: jest.Mock;
     delete: jest.Mock;
+    createQueryBuilder: jest.Mock;
   };
   let fileHistoryRepository: { create: jest.Mock; save: jest.Mock; find: jest.Mock };
   let storageService: { save: jest.Mock; read: jest.Mock; delete: jest.Mock };
@@ -38,9 +40,11 @@ describe('FilesService', () => {
   beforeEach(async () => {
     filesRepository = {
       findOne: jest.fn(),
+      find: jest.fn(),
       create: jest.fn(),
       save: jest.fn(),
       delete: jest.fn(),
+      createQueryBuilder: jest.fn(),
     };
     fileHistoryRepository = {
       create: jest.fn((data) => data),
@@ -142,6 +146,27 @@ describe('FilesService', () => {
       await expect(service.upload(1, makeMulterFile())).rejects.toThrow('disk full');
       expect(filesRepository.delete).toHaveBeenCalledWith('uuid-1');
     });
+
+    it('sets expiresAt to now + expiresIn days', async () => {
+      const now = new Date('2026-01-01T00:00:00.000Z');
+      jest.useFakeTimers({ now });
+      mockFileTypeFromBuffer.mockResolvedValue({ mime: 'image/png', ext: 'png' });
+      let capturedExpiresAt: Date | undefined;
+      filesRepository.create.mockImplementation((data: Partial<FileEntity>) => {
+        capturedExpiresAt = data.expiresAt;
+        return data;
+      });
+      filesRepository.save.mockImplementation(async (e: Partial<FileEntity>) =>
+        Object.assign(e, { id: 'uuid-1' }),
+      );
+      storageService.save.mockResolvedValue(undefined);
+
+      await service.upload(1, makeMulterFile(), 7);
+
+      const expected = new Date('2026-01-08T00:00:00.000Z');
+      expect(capturedExpiresAt).toEqual(expected);
+      jest.useRealTimers();
+    });
   });
 
   describe('getInfoByToken', () => {
@@ -176,6 +201,22 @@ describe('FilesService', () => {
       expect((err as NotFoundException).getResponse()).toMatchObject({
         code: ErrorCode.FILE_NOT_FOUND,
       });
+    });
+
+    it('throws GoneException with FILE_GONE when the file is expired', async () => {
+      filesRepository.findOne.mockResolvedValue({
+        id: 'uuid-1',
+        originalName: 'old.png',
+        mimeType: 'image/png',
+        size: 100,
+        createdAt: new Date('2024-01-01'),
+        expiresAt: new Date('2024-01-02'),
+      });
+
+      const err = await service.getInfoByToken('token-abc').catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(GoneException);
+      expect((err as GoneException).getResponse()).toMatchObject({ code: ErrorCode.FILE_GONE });
     });
   });
 
@@ -232,6 +273,21 @@ describe('FilesService', () => {
       expect((err as NotFoundException).getResponse()).toMatchObject({
         code: ErrorCode.FILE_NOT_FOUND,
       });
+    });
+
+    it('throws GoneException with FILE_GONE when the file is expired', async () => {
+      filesRepository.findOne.mockResolvedValue({
+        id: 'uuid-1',
+        userId: 1,
+        originalName: 'old.png',
+        mimeType: 'image/png',
+        expiresAt: new Date('2024-01-01'),
+      });
+
+      const err = await service.getBufferByToken('token-abc').catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(GoneException);
+      expect((err as GoneException).getResponse()).toMatchObject({ code: ErrorCode.FILE_GONE });
     });
 
     it('throws GoneException with FILE_GONE when the file is missing from storage (ENOENT)', async () => {
@@ -366,6 +422,39 @@ describe('FilesService', () => {
 
       expect(fileHistoryRepository.save).toHaveBeenCalledTimes(1);
       expect(filesRepository.delete).toHaveBeenCalledWith('uuid-1');
+    });
+  });
+
+  describe('findExpiredFiles', () => {
+    it('returns files whose expiresAt is in the past', async () => {
+      const expired = [
+        { id: 'uuid-1', expiresAt: new Date('2024-01-01') },
+        { id: 'uuid-2', expiresAt: new Date('2024-01-02') },
+      ];
+      filesRepository.find.mockResolvedValue(expired);
+
+      const result = await service.findExpiredFiles();
+
+      expect(filesRepository.find).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expect.anything(), take: 100 }),
+      );
+      expect(result).toBe(expired);
+    });
+
+    it('returns an empty array when no files are expired', async () => {
+      filesRepository.find.mockResolvedValue([]);
+
+      const result = await service.findExpiredFiles();
+
+      expect(result).toEqual([]);
+    });
+
+    it('respects the limit parameter', async () => {
+      filesRepository.find.mockResolvedValue([]);
+
+      await service.findExpiredFiles(10);
+
+      expect(filesRepository.find).toHaveBeenCalledWith(expect.objectContaining({ take: 10 }));
     });
   });
 
