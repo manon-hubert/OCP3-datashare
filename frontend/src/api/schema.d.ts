@@ -138,6 +138,9 @@ export interface components {
       email: string;
       password: string;
     };
+    LoginResponseDto: {
+      access_token: string;
+    };
     FileEntity: {
       id: string;
       originalName: string;
@@ -155,6 +158,15 @@ export interface components {
       mimeType: string;
       /** Format: date-time */
       deletedAt: string;
+    };
+    FileInfoDto: {
+      originalName: string;
+      mimeType: string;
+      size: number;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      expiresAt: string;
     };
   };
   responses: never;
@@ -206,7 +218,9 @@ export interface operations {
       /** @description Login successful */
       200: {
         headers: Record<string, unknown>;
-        content?: never;
+        content: {
+          'application/json': components['schemas']['LoginResponseDto'];
+        };
       };
       /** @description Invalid credentials */
       401: {
@@ -217,7 +231,9 @@ export interface operations {
   };
   FilesController_list: {
     parameters: {
-      query?: never;
+      query?: {
+        filter?: 'all' | 'active' | 'expired';
+      };
       header?: never;
       path?: never;
       cookie?: never;
@@ -227,7 +243,9 @@ export interface operations {
       /** @description List of files */
       200: {
         headers: Record<string, unknown>;
-        content?: never;
+        content: {
+          'application/json': components['schemas']['FileEntity'][];
+        };
       };
       /** @description Unauthorized */
       401: {
@@ -300,7 +318,9 @@ export interface operations {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        id: string;
+      };
       cookie?: never;
     };
     requestBody?: never;
@@ -341,7 +361,9 @@ export interface operations {
       /** @description File metadata */
       200: {
         headers: Record<string, unknown>;
-        content?: never;
+        content: {
+          'application/json': components['schemas']['FileInfoDto'];
+        };
       };
       /** @description File not found */
       404: {

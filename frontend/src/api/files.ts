@@ -2,21 +2,16 @@ import { apiClient } from './client';
 import type { components } from './schema';
 
 export type UploadedFile = components['schemas']['FileEntity'];
-export type FileListItem = components['schemas']['FileListItem'];
-export type FileHistoryItem = components['schemas']['FileHistoryItem'];
-
-export interface FileInfo {
-  originalName: string;
-  mimeType: string;
-  size: number;
-  createdAt: string;
-  expiresAt: string;
-}
+export type FileListItem = components['schemas']['FileEntity'];
+export type FileHistoryItem = components['schemas']['FileHistoryEntity'];
+export type FileInfo = components['schemas']['FileInfoDto'];
 
 export async function getFileInfo(token: string): Promise<FileInfo> {
-  const response = await fetch(`${import.meta.env.VITE_API_URL as string}/files/download/${token}`);
-  if (!response.ok) throw new Error('FILE_NOT_FOUND');
-  return (await response.json()) as FileInfo;
+  const { data, error } = await apiClient.GET('/files/download/{token}', {
+    params: { path: { token } },
+  });
+  if (error) throw error;
+  return data!;
 }
 
 export async function uploadFile(file: File, expiresIn: number): Promise<UploadedFile> {
