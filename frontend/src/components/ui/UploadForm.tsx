@@ -41,7 +41,7 @@ const UploadForm = ({
   onUpload,
 }: UploadFormProps) => {
   const { handleSubmit, control } = useForm<UploadFormData>({
-    defaultValues: { fileName: file.name, ttlDays: '1' },
+    defaultValues: { fileName: file.name, ttlDays: '7' },
   });
 
   const onSubmit = handleSubmit(({ ttlDays }) => {
