@@ -92,13 +92,15 @@ export class FilesService {
     };
   }
 
-  async listUserFiles(userId: number, filter: FileFilter) {
+  async listUserFiles(userId: number, filter: FileFilter, page: number, limit: number) {
     const now = new Date();
 
     const qb = this.filesRepository
       .createQueryBuilder('file')
       .where('file.userId = :userId', { userId })
-      .orderBy('file.createdAt', 'DESC');
+      .orderBy('file.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
 
     if (filter === FileFilter.ACTIVE) {
       qb.andWhere('file.expiresAt > :now', { now });
@@ -106,17 +108,22 @@ export class FilesService {
       qb.andWhere('file.expiresAt <= :now', { now });
     }
 
-    const files = await qb.getMany();
+    const [files, total] = await qb.getManyAndCount();
 
-    return files.map((file) => ({
-      id: file.id,
-      originalName: file.originalName,
-      mimeType: file.mimeType,
-      size: file.size,
-      downloadToken: file.downloadToken,
-      createdAt: file.createdAt,
-      expiresAt: file.expiresAt,
-    }));
+    return {
+      data: files.map((file) => ({
+        id: file.id,
+        originalName: file.originalName,
+        mimeType: file.mimeType,
+        size: file.size,
+        downloadToken: file.downloadToken,
+        createdAt: file.createdAt,
+        expiresAt: file.expiresAt,
+      })),
+      total,
+      page,
+      limit,
+    };
   }
 
   async findExpiredFiles(limit = 100): Promise<FileEntity[]> {
@@ -126,11 +133,14 @@ export class FilesService {
     });
   }
 
-  async listUserHistory(userId: number): Promise<FileHistoryEntity[]> {
-    return this.fileHistoryRepository.find({
+  async listUserHistory(userId: number, page: number, limit: number) {
+    const [data, total] = await this.fileHistoryRepository.findAndCount({
       where: { userId },
       order: { deletedAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
     });
+    return { data, total, page, limit };
   }
 
   async deleteFile(file: FileEntity): Promise<void> {

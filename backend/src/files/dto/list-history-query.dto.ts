@@ -1,19 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
+import { IsInt, IsOptional, Max, Min } from 'class-validator';
 
-export enum FileFilter {
-  ALL = 'all',
-  ACTIVE = 'active',
-  EXPIRED = 'expired',
-}
-
-export class ListFilesQueryDto {
-  @ApiProperty({ enum: FileFilter, default: FileFilter.ALL, required: false })
-  @IsOptional()
-  @IsEnum(FileFilter)
-  filter?: FileFilter = FileFilter.ALL;
-
+export class ListHistoryQueryDto {
   @ApiProperty({ default: 1, required: false, minimum: 1 })
   @IsOptional()
   @Type(() => Number)

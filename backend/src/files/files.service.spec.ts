@@ -34,7 +34,7 @@ describe('FilesService', () => {
     delete: jest.Mock;
     createQueryBuilder: jest.Mock;
   };
-  let fileHistoryRepository: { create: jest.Mock; save: jest.Mock; find: jest.Mock };
+  let fileHistoryRepository: { create: jest.Mock; save: jest.Mock; findAndCount: jest.Mock };
   let storageService: { save: jest.Mock; read: jest.Mock; delete: jest.Mock };
 
   beforeEach(async () => {
@@ -49,7 +49,7 @@ describe('FilesService', () => {
     fileHistoryRepository = {
       create: jest.fn((data) => data),
       save: jest.fn(),
-      find: jest.fn(),
+      findAndCount: jest.fn(),
     };
     storageService = {
       save: jest.fn(),
@@ -476,23 +476,25 @@ describe('FilesService', () => {
           deletedAt: new Date('2024-01-01'),
         },
       ];
-      fileHistoryRepository.find.mockResolvedValue(entries);
+      fileHistoryRepository.findAndCount.mockResolvedValue([entries, entries.length]);
 
-      const result = await service.listUserHistory(1);
+      const result = await service.listUserHistory(1, 1, 10);
 
-      expect(fileHistoryRepository.find).toHaveBeenCalledWith({
+      expect(fileHistoryRepository.findAndCount).toHaveBeenCalledWith({
         where: { userId: 1 },
         order: { deletedAt: 'DESC' },
+        skip: 0,
+        take: 10,
       });
-      expect(result).toBe(entries);
+      expect(result).toEqual({ data: entries, total: entries.length, page: 1, limit: 10 });
     });
 
     it('returns an empty array when the user has no history', async () => {
-      fileHistoryRepository.find.mockResolvedValue([]);
+      fileHistoryRepository.findAndCount.mockResolvedValue([[], 0]);
 
-      const result = await service.listUserHistory(99);
+      const result = await service.listUserHistory(99, 1, 10);
 
-      expect(result).toEqual([]);
+      expect(result).toEqual({ data: [], total: 0, page: 1, limit: 10 });
     });
   });
 });

@@ -27,13 +27,15 @@ import type { Response } from 'express';
 import { memoryStorage } from 'multer';
 import { FilesService } from './files.service';
 import { FileEntity } from './entities/file.entity';
-import { FileHistoryEntity } from './entities/file-history.entity';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 import { CurrentUser, type JwtPayload } from '../common/decorators/current-user.decorator';
 import { FileSizePipe } from '../common/pipes/file-size.pipe';
 import { ListFilesQueryDto } from './dto/list-files-query.dto';
+import { ListHistoryQueryDto } from './dto/list-history-query.dto';
 import { FileInfoDto } from './dto/file-info.dto';
+import { FileResponseDto } from './dto/file-response.dto';
+import { PaginatedFileListDto, PaginatedFileHistoryDto } from './dto/paginated-files.dto';
 import { UploadFileDto } from './dto/upload-file.dto';
 import { FileOwnerGuard } from './guards/file-owner.guard';
 
@@ -58,7 +60,7 @@ export class FilesController {
     },
   })
   @ApiOperation({ summary: 'Upload a file' })
-  @ApiResponse({ status: 201, description: 'File uploaded successfully', type: FileEntity })
+  @ApiResponse({ status: 201, description: 'File uploaded successfully', type: FileResponseDto })
   @ApiResponse({ status: 413, description: 'File exceeds the size limit' })
   @ApiResponse({ status: 415, description: 'File type not allowed' })
   async upload(
@@ -72,19 +74,19 @@ export class FilesController {
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'List files for authenticated user' })
-  @ApiResponse({ status: 200, description: 'List of files', type: [FileEntity] })
+  @ApiResponse({ status: 200, description: 'List of files', type: PaginatedFileListDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async list(@CurrentUser() user: JwtPayload, @Query() query: ListFilesQueryDto) {
-    return this.filesService.listUserFiles(user.sub, query.filter!);
+    return this.filesService.listUserFiles(user.sub, query.filter!, query.page!, query.limit!);
   }
 
   @Get('history')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'List deleted/expired files for authenticated user' })
-  @ApiResponse({ status: 200, description: 'File history', type: [FileHistoryEntity] })
+  @ApiResponse({ status: 200, description: 'File history', type: PaginatedFileHistoryDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async history(@CurrentUser() user: JwtPayload) {
-    return this.filesService.listUserHistory(user.sub);
+  async history(@CurrentUser() user: JwtPayload, @Query() query: ListHistoryQueryDto) {
+    return this.filesService.listUserHistory(user.sub, query.page!, query.limit!);
   }
 
   @Delete(':id')

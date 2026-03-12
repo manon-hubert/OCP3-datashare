@@ -410,13 +410,13 @@ describe('Files (integration)', () => {
   });
 
   describe('GET /files/history', () => {
-    it('returns 200 with an empty array when the user has no history', async () => {
+    it('returns 200 with empty data when the user has no history', async () => {
       const res = await request(app.getHttpServer())
         .get('/files/history')
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      expect(res.body).toEqual([]);
+      expect(res.body).toEqual({ data: [], total: 0, page: 1, limit: 20 });
     });
 
     it('returns the history entry after a file is deleted', async () => {
@@ -435,13 +435,14 @@ describe('Files (integration)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      expect(res.body).toHaveLength(1);
-      expect(res.body[0]).toMatchObject({
+      expect(res.body.total).toBe(1);
+      expect(res.body.data).toHaveLength(1);
+      expect(res.body.data[0]).toMatchObject({
         originalName: 'photo.png',
         mimeType: 'image/png',
         deletedAt: expect.any(String),
       });
-      expect(res.body[0].userId).toBeUndefined();
+      expect(res.body.data[0].userId).toBeUndefined();
     });
 
     it('returns entries ordered by deletedAt DESC', async () => {
@@ -460,8 +461,37 @@ describe('Files (integration)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      expect(res.body[0].originalName).toBe('second.png');
-      expect(res.body[1].originalName).toBe('first.png');
+      expect(res.body.data[0].originalName).toBe('second.png');
+      expect(res.body.data[1].originalName).toBe('first.png');
+    });
+
+    it('paginates history correctly', async () => {
+      for (const name of ['a.png', 'b.png', 'c.png']) {
+        const uploadRes = await request(app.getHttpServer())
+          .post('/files')
+          .set('Authorization', `Bearer ${authToken}`)
+          .attach('file', SMALL_PNG, { filename: name, contentType: 'image/png' });
+        await request(app.getHttpServer())
+          .delete(`/files/${uploadRes.body.id as string}`)
+          .set('Authorization', `Bearer ${authToken}`);
+      }
+
+      const res = await request(app.getHttpServer())
+        .get('/files/history?page=2&limit=2')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(res.body.total).toBe(3);
+      expect(res.body.page).toBe(2);
+      expect(res.body.limit).toBe(2);
+      expect(res.body.data).toHaveLength(1);
+    });
+
+    it('returns 400 when page is less than 1', async () => {
+      await request(app.getHttpServer())
+        .get('/files/history?page=0')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(400);
     });
 
     it('returns 401 when no token is provided', async () => {
@@ -491,7 +521,7 @@ describe('Files (integration)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      expect(res.body).toEqual([]);
+      expect(res.body.data).toEqual([]);
 
       const otherUser = await usersRepository.findOneBy({ email: otherEmail });
       await fileHistoryRepository.delete({ userId: otherUser!.id });
@@ -500,6 +530,41 @@ describe('Files (integration)', () => {
   });
 
   describe('GET /files', () => {
+    it('returns 200 with empty data when the user has no files', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/files')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(res.body).toEqual({ data: [], total: 0, page: 1, limit: 20 });
+    });
+
+    it('paginates file list correctly', async () => {
+      for (const name of ['a.png', 'b.png', 'c.png']) {
+        await request(app.getHttpServer())
+          .post('/files')
+          .set('Authorization', `Bearer ${authToken}`)
+          .attach('file', SMALL_PNG, { filename: name, contentType: 'image/png' });
+      }
+
+      const res = await request(app.getHttpServer())
+        .get('/files?page=2&limit=2')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(res.body.total).toBe(3);
+      expect(res.body.page).toBe(2);
+      expect(res.body.limit).toBe(2);
+      expect(res.body.data).toHaveLength(1);
+    });
+
+    it('returns 400 when page is less than 1', async () => {
+      await request(app.getHttpServer())
+        .get('/files?page=0')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(400);
+    });
+
     it('does not return another user files', async () => {
       const otherEmail = 'other-list@datashare.test';
       await request(app.getHttpServer())
@@ -520,7 +585,7 @@ describe('Files (integration)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      expect(res.body).toEqual([]);
+      expect(res.body.data).toEqual([]);
 
       const otherUser = await usersRepository.findOneBy({ email: otherEmail });
       await filesRepository.delete({ userId: otherUser!.id });
