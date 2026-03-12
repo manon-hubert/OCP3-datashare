@@ -1,5 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Alert, Box, Button, Flex, Heading, Spinner, Tabs, Text } from '@chakra-ui/react';
+import {
+  Alert,
+  Box,
+  Button,
+  ButtonGroup,
+  Flex,
+  Heading,
+  IconButton,
+  Pagination,
+  Spinner,
+  Tabs,
+  Text,
+} from '@chakra-ui/react';
+import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 import {
   listFiles,
   listFileHistory,
@@ -10,12 +23,17 @@ import {
 import { FileRow } from '../components/dashboard/FileRow';
 import { useNavigate } from 'react-router-dom';
 
+const PAGE_SIZE = 20;
+
 type Tab = 'all' | 'active' | 'expired';
 
 function MyFilesPage() {
   const [tab, setTab] = useState<Tab>('active');
+  const [page, setPage] = useState(1);
   const [files, setFiles] = useState<FileListItem[]>([]);
   const [history, setHistory] = useState<FileHistoryItem[]>([]);
+  const [filesTotal, setFilesTotal] = useState(0);
+  const [historyTotal, setHistoryTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,28 +43,40 @@ function MyFilesPage() {
     setFiles([]);
     setHistory([]);
     if (tab === 'all') {
-      Promise.all([listFiles('all'), listFileHistory()])
+      Promise.all([listFiles('all', page, PAGE_SIZE), listFileHistory(page, PAGE_SIZE)])
         .then(([f, h]) => {
-          setFiles(f);
-          setHistory(h);
+          setFiles(f.data);
+          setFilesTotal(f.total);
+          setHistory(h.data);
+          setHistoryTotal(h.total);
         })
         .catch(() => setError('Impossible de charger les fichiers.'))
         .finally(() => setLoading(false));
     } else if (tab === 'expired') {
-      Promise.all([listFiles('expired'), listFileHistory()])
+      Promise.all([listFiles('expired', page, PAGE_SIZE), listFileHistory(page, PAGE_SIZE)])
         .then(([f, h]) => {
-          setFiles(f);
-          setHistory(h);
+          setFiles(f.data);
+          setFilesTotal(f.total);
+          setHistory(h.data);
+          setHistoryTotal(h.total);
         })
         .catch(() => setError("Impossible de charger l'historique."))
         .finally(() => setLoading(false));
     } else {
-      listFiles(tab)
-        .then(setFiles)
+      listFiles(tab, page, PAGE_SIZE)
+        .then((res) => {
+          setFiles(res.data);
+          setFilesTotal(res.total);
+        })
         .catch(() => setError('Impossible de charger les fichiers.'))
         .finally(() => setLoading(false));
     }
-  }, [tab]);
+  }, [tab, page]);
+
+  function handleTabChange(newTab: Tab) {
+    setTab(newTab);
+    setPage(1);
+  }
 
   async function handleDelete(id: string) {
     try {
@@ -58,11 +88,13 @@ function MyFilesPage() {
     }
   }
 
+  const total = tab === 'active' ? filesTotal : Math.max(filesTotal, historyTotal);
+
   const isEmpty =
     tab === 'all'
       ? files.length === 0 && history.length === 0
       : tab === 'expired'
-        ? history.length === 0
+        ? files.length === 0 && history.length === 0
         : files.length === 0;
 
   const navigate = useNavigate();
@@ -85,7 +117,7 @@ function MyFilesPage() {
 
       <Tabs.Root
         value={tab}
-        onValueChange={(e: { value: string }) => setTab(e.value as Tab)}
+        onValueChange={(e: { value: string }) => handleTabChange(e.value as Tab)}
         variant="enclosed"
         mb="6"
       >
@@ -117,6 +149,30 @@ function MyFilesPage() {
           {tab !== 'active' &&
             history.map((item) => <FileRow key={item.id} kind="history" item={item} />)}
         </Flex>
+      )}
+
+      {total > PAGE_SIZE && (
+        <Pagination.Root
+          count={total}
+          pageSize={PAGE_SIZE}
+          page={page}
+          onPageChange={(e) => setPage(e.page)}
+          mt="6"
+        >
+          <ButtonGroup variant="ghost" size="sm" alignItems="center">
+            <Pagination.PrevTrigger asChild>
+              <IconButton aria-label="Page précédente">
+                <LuChevronLeft />
+              </IconButton>
+            </Pagination.PrevTrigger>
+            <Pagination.PageText format="short" textStyle="small" color="black" />
+            <Pagination.NextTrigger asChild>
+              <IconButton aria-label="Page suivante">
+                <LuChevronRight />
+              </IconButton>
+            </Pagination.NextTrigger>
+          </ButtonGroup>
+        </Pagination.Root>
       )}
     </Box>
   );

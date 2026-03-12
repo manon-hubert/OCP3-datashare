@@ -5,6 +5,8 @@ export type UploadedFile = components['schemas']['FileEntity'];
 export type FileListItem = components['schemas']['FileEntity'];
 export type FileHistoryItem = components['schemas']['FileHistoryEntity'];
 export type FileInfo = components['schemas']['FileInfoDto'];
+export type PaginatedFileList = components['schemas']['PaginatedFileListDto'];
+export type PaginatedFileHistory = components['schemas']['PaginatedFileHistoryDto'];
 
 export async function getFileInfo(token: string): Promise<FileInfo> {
   const { data, error } = await apiClient.GET('/files/download/{token}', {
@@ -31,16 +33,20 @@ export async function uploadFile(file: File, expiresIn: number): Promise<Uploade
 
 export async function listFiles(
   filter: 'all' | 'active' | 'expired' = 'all',
-): Promise<FileListItem[]> {
+  page = 1,
+  limit = 20,
+): Promise<PaginatedFileList> {
   const { data, error } = await apiClient.GET('/files', {
-    params: { query: { filter } },
+    params: { query: { filter, page, limit } },
   });
   if (error) throw error;
   return data!;
 }
 
-export async function listFileHistory(): Promise<FileHistoryItem[]> {
-  const { data, error } = await apiClient.GET('/files/history');
+export async function listFileHistory(page = 1, limit = 20): Promise<PaginatedFileHistory> {
+  const { data, error } = await apiClient.GET('/files/history', {
+    params: { query: { page, limit } },
+  });
   if (error) throw error;
   return data!;
 }

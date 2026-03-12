@@ -39,8 +39,18 @@ const mockHistory: filesApi.FileHistoryItem[] = [
 
 beforeEach(() => {
   vi.resetAllMocks();
-  vi.mocked(filesApi.listFiles).mockResolvedValue(mockFiles);
-  vi.mocked(filesApi.listFileHistory).mockResolvedValue(mockHistory);
+  vi.mocked(filesApi.listFiles).mockResolvedValue({
+    data: mockFiles,
+    total: mockFiles.length,
+    page: 1,
+    limit: 20,
+  });
+  vi.mocked(filesApi.listFileHistory).mockResolvedValue({
+    data: mockHistory,
+    total: mockHistory.length,
+    page: 1,
+    limit: 20,
+  });
   vi.mocked(filesApi.deleteFile).mockResolvedValue();
 });
 
@@ -50,19 +60,21 @@ describe('MyFilesPage', () => {
 
     await waitFor(() => expect(screen.getByText('photo.jpg')).toBeInTheDocument());
     expect(screen.getByText('doc.pdf')).toBeInTheDocument();
-    expect(filesApi.listFiles).toHaveBeenCalledWith('active');
+    expect(filesApi.listFiles).toHaveBeenCalledWith('active', 1, 20);
     expect(filesApi.listFileHistory).not.toHaveBeenCalled();
   });
 
-  it('calls listFileHistory (only) when switching to the "Expiré" tab', async () => {
+  it('calls both listFiles("expired") and listFileHistory when switching to the "Expiré" tab', async () => {
     const user = userEvent.setup();
     renderWithProviders(<MyFilesPage />);
     await waitFor(() => expect(filesApi.listFiles).toHaveBeenCalled());
 
     await user.click(screen.getByRole('tab', { name: 'Expiré' }));
 
-    await waitFor(() => expect(filesApi.listFileHistory).toHaveBeenCalledOnce());
-    expect(filesApi.listFiles).not.toHaveBeenCalledWith('expired');
+    await waitFor(() => {
+      expect(filesApi.listFiles).toHaveBeenCalledWith('expired', 1, 20);
+      expect(filesApi.listFileHistory).toHaveBeenCalledWith(1, 20);
+    });
     expect(screen.getByText('old.zip')).toBeInTheDocument();
   });
 
@@ -74,9 +86,11 @@ describe('MyFilesPage', () => {
     await user.click(screen.getByRole('tab', { name: 'Tous' }));
 
     await waitFor(() => {
-      expect(filesApi.listFiles).toHaveBeenCalledWith('all');
-      expect(filesApi.listFileHistory).toHaveBeenCalledOnce();
+      expect(filesApi.listFiles).toHaveBeenCalledWith('all', 1, 20);
+      expect(filesApi.listFileHistory).toHaveBeenCalledWith(1, 20);
     });
+    expect(screen.getByText('photo.jpg')).toBeInTheDocument();
+    expect(screen.getByText('old.zip')).toBeInTheDocument();
   });
 
   it('removes the deleted file from the list immediately', async () => {
@@ -101,8 +115,43 @@ describe('MyFilesPage', () => {
     await waitFor(() => expect(screen.getByText('Accès refusé')).toBeInTheDocument());
   });
 
+  it('calls listFiles with page 2 when page changes', async () => {
+    vi.mocked(filesApi.listFiles).mockResolvedValue({
+      data: mockFiles,
+      total: 100,
+      page: 1,
+      limit: 20,
+    });
+    const user = userEvent.setup();
+    renderWithProviders(<MyFilesPage />);
+    await waitFor(() => screen.getByText('photo.jpg'));
+
+    await user.click(screen.getByRole('button', { name: /page suivante/i }));
+
+    await waitFor(() => expect(filesApi.listFiles).toHaveBeenCalledWith('active', 2, 20));
+  });
+
+  it('resets to page 1 when switching tabs', async () => {
+    vi.mocked(filesApi.listFiles).mockResolvedValue({
+      data: mockFiles,
+      total: 100,
+      page: 1,
+      limit: 20,
+    });
+    const user = userEvent.setup();
+    renderWithProviders(<MyFilesPage />);
+    await waitFor(() => screen.getByText('photo.jpg'));
+
+    await user.click(screen.getByRole('button', { name: /page suivante/i }));
+    await waitFor(() => expect(filesApi.listFiles).toHaveBeenCalledWith('active', 2, 20));
+
+    await user.click(screen.getByRole('tab', { name: 'Tous' }));
+
+    await waitFor(() => expect(filesApi.listFiles).toHaveBeenCalledWith('all', 1, 20));
+  });
+
   it('shows an empty state when there are no files', async () => {
-    vi.mocked(filesApi.listFiles).mockResolvedValue([]);
+    vi.mocked(filesApi.listFiles).mockResolvedValue({ data: [], total: 0, page: 1, limit: 20 });
     renderWithProviders(<MyFilesPage />);
 
     await waitFor(() => expect(screen.getByText('Aucun fichier à afficher.')).toBeInTheDocument());

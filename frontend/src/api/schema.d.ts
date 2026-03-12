@@ -152,12 +152,24 @@ export interface components {
       /** Format: date-time */
       expiresAt: string;
     };
+    PaginatedFileListDto: {
+      data: components['schemas']['FileEntity'][];
+      total: number;
+      page: number;
+      limit: number;
+    };
     FileHistoryEntity: {
       id: string;
       originalName: string;
       mimeType: string;
       /** Format: date-time */
       deletedAt: string;
+    };
+    PaginatedFileHistoryDto: {
+      data: components['schemas']['FileHistoryEntity'][];
+      total: number;
+      page: number;
+      limit: number;
     };
     FileInfoDto: {
       originalName: string;
@@ -233,6 +245,8 @@ export interface operations {
     parameters: {
       query?: {
         filter?: 'all' | 'active' | 'expired';
+        page?: number;
+        limit?: number;
       };
       header?: never;
       path?: never;
@@ -244,7 +258,7 @@ export interface operations {
       200: {
         headers: Record<string, unknown>;
         content: {
-          'application/json': components['schemas']['FileEntity'][];
+          'application/json': components['schemas']['PaginatedFileListDto'];
         };
       };
       /** @description Unauthorized */
@@ -293,7 +307,10 @@ export interface operations {
   };
   FilesController_history: {
     parameters: {
-      query?: never;
+      query?: {
+        page?: number;
+        limit?: number;
+      };
       header?: never;
       path?: never;
       cookie?: never;
@@ -304,7 +321,7 @@ export interface operations {
       200: {
         headers: Record<string, unknown>;
         content: {
-          'application/json': components['schemas']['FileHistoryEntity'][];
+          'application/json': components['schemas']['PaginatedFileHistoryDto'];
         };
       };
       /** @description Unauthorized */
