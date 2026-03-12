@@ -1,4 +1,8 @@
 import { defineConfig } from '@playwright/test';
+import { config } from 'dotenv';
+import path from 'path';
+
+config({ path: path.resolve(__dirname, '../.env') });
 
 export default defineConfig({
   testDir: './tests',
@@ -9,7 +13,7 @@ export default defineConfig({
   reporter: 'html',
 
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: process.env.FRONTEND_URL ?? 'http://localhost:5173',
     trace: 'on-first-retry',
   },
 

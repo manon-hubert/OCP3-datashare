@@ -83,12 +83,24 @@ Use the global HttpExceptionFilter — do not return error shapes manually in co
 
 ## Tests
 
-- E2E tests use Playwright in /e2e — run with npm run test:e2e from root (tests not yet written)
+- E2E tests use Playwright in /e2e — run with npm run test:e2e from root
 - Backend integration tests use Jest in /backend/test — run with npm run test from /backend
-- DB is cleaned between tests via repository calls in afterEach (no shared utility)
-- Large files in tests are generated as in-memory Buffers — nothing written to disk
+- Backend integration tests clean the DB between tests via repository calls in afterEach (no shared utility)
+- E2E tests do not clean the DB — test isolation relies on unique emails generated with Date.now()
+- Backend integration tests generate file content as in-memory Buffers — nothing written to disk
 - Frontend unit tests use Vitest + Testing Library in /frontend — run with npm run test from /frontend
 - Frontend tests mock the api/\* layer (vi.mock) — never test HTTP directly
+
+### E2E structure
+
+- Tests are in `e2e/tests/` grouped by domain: `auth/` and `files/`
+- Page Object Models are in `e2e/pages/` — one file per page
+- Each POM keeps all selectors in an `elements {}` object — never write selectors directly in methods
+- `isDisplayed()` assertions (structural "is this page loaded?") live in POMs; scenario-specific assertions (`expect(...)`) stay in test files
+- `e2e/fixtures/index.ts` exports a custom `test` with an `authenticatedPage` fixture — it registers a fresh user via API, then creates a browser context with the token pre-loaded in `localStorage` via `storageState` (not `addInitScript`, which would re-inject the token after logout)
+- `e2e/helpers/api.ts` exposes `registerUser` and `loginUser` for test setup that requires API calls
+- `e2e/resources/` holds real files used as upload fixtures (e.g. `cactus.gif`)
+- The baseURL is read from `FRONTEND_URL` in the root `.env` file; `API_URL` is used by the API helpers
 
 ## Code Style
 

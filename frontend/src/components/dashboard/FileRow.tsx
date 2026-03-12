@@ -15,6 +15,7 @@ export function FileRow(props: FileRowProps) {
 
   return (
     <Flex
+      data-testid="file-row"
       align="center"
       bg="{colors.fileRow.bg}"
       border="1px solid"
@@ -58,6 +59,7 @@ export function FileRow(props: FileRowProps) {
               variant="outline"
               size="sm"
               gap="2"
+              data-testid="file-delete-button"
               onClick={() => props.onDelete(props.file.id)}
             >
               <Trash2 size={14} />

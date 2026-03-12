@@ -18,11 +18,11 @@ function Header() {
         <Link to="/">Datashare</Link>
       </Heading>
       {isAuthenticated ? (
-        <Button asChild variant="solid" size="md">
+        <Button asChild variant="solid" size="md" data-testid="header-dashboard">
           <Link to="/my-files">Mon espace</Link>
         </Button>
       ) : (
-        <Button asChild variant="solid" size="md">
+        <Button asChild variant="solid" size="md" data-testid="header-login">
           <Link to="/login">Se connecter</Link>
         </Button>
       )}

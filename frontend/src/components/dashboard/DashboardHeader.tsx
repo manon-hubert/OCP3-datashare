@@ -44,7 +44,7 @@ function DashboardHeader({ onToggleSidebar }: DashboardHeaderProps) {
           >
             Ajouter des fichiers
           </Button>
-          <Button variant="ghost" size="sm" onClick={logout} gap="2">
+          <Button variant="ghost" size="sm" onClick={logout} gap="2" data-testid="logout-button">
             <LogOut size={16} />
             <Box display={{ base: 'none', md: 'inline' }}>Déconnexion</Box>
           </Button>

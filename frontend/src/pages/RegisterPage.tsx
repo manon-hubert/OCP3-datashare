@@ -47,6 +47,7 @@ function RegisterPage() {
                     type="email"
                     placeholder="Saisissez votre email..."
                     autoComplete="email"
+                    data-testid="register-email"
                     {...register('email', {
                       required: "L'email est requis",
                       pattern: {
@@ -66,6 +67,7 @@ function RegisterPage() {
                     type="password"
                     autoComplete="new-password"
                     placeholder="Saisissez votre mot de passe..."
+                    data-testid="register-password"
                     {...register('password', {
                       required: 'Le mot de passe est requis',
                       minLength: {
@@ -84,6 +86,7 @@ function RegisterPage() {
                   <Input
                     type="password"
                     placeholder="Saisissez le à nouveau"
+                    data-testid="register-confirm-password"
                     {...register('confirmPassword', {
                       required: 'La confirmation est requise',
                       validate: (value) =>
@@ -97,10 +100,14 @@ function RegisterPage() {
               </Field.Root>
             </Stack>
             {submissionStatus === 'success' && (
-              <Alert.Root status="success">
+              <Alert.Root status="success" data-testid="register-success">
                 <Alert.Indicator />
                 <Alert.Title>
-                  Vous pouvez maintenant <Link to="/login">vous connecter</Link>.
+                  Vous pouvez maintenant{' '}
+                  <Link to="/login" data-testid="register-login-link">
+                    vous connecter
+                  </Link>
+                  .
                 </Alert.Title>
               </Alert.Root>
             )}
@@ -114,7 +121,12 @@ function RegisterPage() {
               <Button asChild variant="ghost">
                 <Link to="/login">J'ai déjà un compte</Link>
               </Button>
-              <Button variant="surface" type="submit" loading={isSubmitting}>
+              <Button
+                variant="surface"
+                type="submit"
+                loading={isSubmitting}
+                data-testid="register-submit"
+              >
                 Créer mon compte
               </Button>
             </VStack>

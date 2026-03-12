@@ -102,7 +102,7 @@ function MyFilesPage() {
   return (
     <Box>
       <Flex direction="row" align="center" justify="space-between" mb="6">
-        <Heading as="h2" textStyle="h2">
+        <Heading as="h2" textStyle="h2" data-testid="my-files-heading">
           Mes fichiers
         </Heading>
         <Button
@@ -122,9 +122,15 @@ function MyFilesPage() {
         mb="6"
       >
         <Tabs.List>
-          <Tabs.Trigger value="all">Tous</Tabs.Trigger>
-          <Tabs.Trigger value="active">Actifs</Tabs.Trigger>
-          <Tabs.Trigger value="expired">Expiré</Tabs.Trigger>
+          <Tabs.Trigger value="all" data-testid="tab-all">
+            Tous
+          </Tabs.Trigger>
+          <Tabs.Trigger value="active" data-testid="tab-active">
+            Actifs
+          </Tabs.Trigger>
+          <Tabs.Trigger value="expired" data-testid="tab-expired">
+            Expiré
+          </Tabs.Trigger>
         </Tabs.List>
       </Tabs.Root>
 

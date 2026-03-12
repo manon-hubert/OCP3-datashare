@@ -13,6 +13,7 @@ const UploadSuccessCard = ({ uploadedFile, ttlDays }: UploadSuccessCardProps) =>
 
   return (
     <Box
+      data-testid="upload-success-card"
       layerStyle="card"
       width="100%"
       maxW={{ base: '100%', md: '540px' }}
@@ -65,6 +66,7 @@ const UploadSuccessCard = ({ uploadedFile, ttlDays }: UploadSuccessCardProps) =>
             borderColor="form.linkBorder"
           >
             <Text
+              data-testid="share-url"
               textStyle="normal"
               textDecoration="underline"
               color="form.linkText"

@@ -93,6 +93,7 @@ const HomePage = () => {
         ref={fileInputRef}
         style={{ display: 'none' }}
         onChange={handleFileChange}
+        data-testid="file-input"
       />
       {renderContent()}
     </Flex>

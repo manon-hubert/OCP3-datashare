@@ -157,7 +157,7 @@ const UploadForm = ({
           />
 
           {uploadError && (
-            <Alert.Root status="error" size="sm">
+            <Alert.Root status="error" size="sm" data-testid="upload-error">
               <Alert.Indicator />
               <Alert.Title>{uploadError}</Alert.Title>
             </Alert.Root>
@@ -168,6 +168,7 @@ const UploadForm = ({
             type="submit"
             disabled={fileSizeError || isUploading}
             loading={isUploading}
+            data-testid="upload-submit"
           >
             <CloudUpload />
             Téléverser

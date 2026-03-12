@@ -47,6 +47,7 @@ function LoginPage() {
                     type="email"
                     placeholder="Saisissez votre email..."
                     autoComplete="email"
+                    data-testid="login-email"
                     {...register('email', {
                       required: "L'email est requis",
                       pattern: {
@@ -65,6 +66,7 @@ function LoginPage() {
                     type="password"
                     autoComplete="new-password"
                     placeholder="Saisissez votre mot de passe..."
+                    data-testid="login-password"
                     {...register('password', {
                       required: 'Le mot de passe est requis',
                     })}
@@ -74,7 +76,7 @@ function LoginPage() {
               </Field.Root>
             </Stack>
             {submissionStatus === 'error' && (
-              <Alert.Root status="error">
+              <Alert.Root status="error" data-testid="login-error">
                 <Alert.Indicator />
                 <Alert.Title>Email ou mot de passe incorrect.</Alert.Title>
               </Alert.Root>
@@ -83,7 +85,12 @@ function LoginPage() {
               <Button asChild variant="ghost">
                 <Link to="/register">Créer un compte</Link>
               </Button>
-              <Button variant="surface" type="submit" loading={isSubmitting}>
+              <Button
+                variant="surface"
+                type="submit"
+                loading={isSubmitting}
+                data-testid="login-submit"
+              >
                 Connexion
               </Button>
             </VStack>

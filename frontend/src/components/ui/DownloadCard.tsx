@@ -74,14 +74,18 @@ const DownloadCard = ({ fileInfo, token }: DownloadCardProps) => {
             </Flex>
           )}
 
-          <Alert.Root status={status} size="sm">
+          <Alert.Root
+            status={status}
+            size="sm"
+            {...(isExpired && { 'data-testid': 'expired-message' })}
+          >
             <Alert.Indicator />
             <Alert.Title>{message}</Alert.Title>
           </Alert.Root>
         </Stack>
 
         {!isExpired && (
-          <Button variant="surface" asChild>
+          <Button variant="surface" asChild data-testid="download-button">
             <a href={downloadUrl} download>
               <CloudDownload />
               Télécharger
