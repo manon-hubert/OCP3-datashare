@@ -23,28 +23,36 @@ It is built as a monorepo with three npm workspaces: `backend/`, `frontend/`, an
 - JWT auth, 15 min expiry, no refresh tokens
 - User identity is always derived from the JWT — never trust a userId from request params or body
 
+## Key API endpoints (files)
+
+- `POST /files` — upload a file (optional auth, `expiresIn` 1–7 days)
+- `GET /files` — list user's files; query params: `filter` (`all` | `active` | `expired`), `page`, `limit`
+- `GET /files/history` — paginated list of deleted/expired file history (auth required); query params: `page`, `limit`
+- `DELETE /files/:id` — delete a file (auth + ownership required via FileOwnerGuard)
+- `GET /files/download/:token` — get file metadata by download token
+- `GET /files/download/:token/content` — stream file download by token
+
+## Frontend file listing behavior
+
+- `MyFilesPage` has three tabs: Tous (all), Actifs (active), Expiré (expired)
+- The **Expiré** tab fetches from **both** `GET /files?filter=expired` and `GET /files/history`, merging live expired files with deleted file history
+- The **Tous** tab similarly fetches from both endpoints
+- The **Actifs** tab fetches only from `GET /files?filter=active`
+
 ## Database
 
-- PostgreSQL with the following tables: users, files, file_tags, tags, file_history
+- PostgreSQL with the following tables: user_entity, files, file_history
+- tags and file_tags are not yet implemented
 - files rows are always live — no soft deletes, deleted rows move to file_history
 - Anonymous uploads are supported (user_id is nullable on files)
 - Tags only exist on live files — file_history has no tag reference
+- Anonymous file deletions are NOT recorded in file_history — only authenticated user files are tracked
 
-## MVP scope (build only these)
+## File lifecycle
 
-- Register, login (JWT)
-- Upload file (authenticated only, no password, no tags, no custom expiry)
-- List own files (paginated)
-- Delete file
-- Download file by token
-
-## Deferred (do not build yet)
-
-- Anonymous uploads
-- Tags
-- Password-protected downloads
-- File expiration cron job
-- File history endpoint
+- Files expire after 1–7 days (default 7). `expiresAt` is computed at upload time from the `expiresIn` parameter
+- Expired files still exist in the `files` table until explicitly deleted or cleaned up
+- On deletion: the file is removed from storage, the row is deleted from `files`, and (for authenticated users only) a record is inserted into `file_history`
 
 ## Error handling
 
@@ -60,7 +68,8 @@ Use the global HttpExceptionFilter — do not return error shapes manually in co
 
 ## Security rules
 
-- Passwords (user + file download) are always hashed with bcrypt — never stored plain
+- Passwords (user) are always hashed with bcrypt — never stored plain
+- File download passwords are not yet implemented (`FILE_WRONG_PASSWORD` error code is reserved for future use)
 - download_token is cryptographically random (crypto.randomBytes) — never use the file UUID publicly
 - Always verify file ownership in DELETE /files/:id using FileOwnerGuard, not in the service layer
 - MIME types are verified against magic bytes server-side — never trust Content-Type from the client
@@ -74,11 +83,12 @@ Use the global HttpExceptionFilter — do not return error shapes manually in co
 
 ## Tests
 
-- E2E tests use Playwright in /e2e — run with npm run test:e2e from root
-- Backend unit/integration tests use Jest in /backend/test
-- E2E tests set up preconditions via API calls (utils/api.ts), not through the UI
-- DB is cleaned between test suites via utils/db.ts
-- Do not commit large test files — large-file.bin is generated at runtime
+- E2E tests use Playwright in /e2e — run with npm run test:e2e from root (tests not yet written)
+- Backend integration tests use Jest in /backend/test — run with npm run test from /backend
+- DB is cleaned between tests via repository calls in afterEach (no shared utility)
+- Large files in tests are generated as in-memory Buffers — nothing written to disk
+- Frontend unit tests use Vitest + Testing Library in /frontend — run with npm run test from /frontend
+- Frontend tests mock the api/\* layer (vi.mock) — never test HTTP directly
 
 ## Code Style
 
