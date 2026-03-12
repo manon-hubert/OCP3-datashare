@@ -22,14 +22,7 @@ function DashboardHeader({ onToggleSidebar }: DashboardHeaderProps) {
       borderBottom="1px solid"
       borderColor="{colors.dashboard.header.border}"
     >
-      <Flex
-        direction="row"
-        justify="flex-end"
-        align="center"
-        maxW="1280px"
-        alignSelf="stretch"
-        h="64px"
-      >
+      <Flex direction="row" justify="flex-end" align="center" alignSelf="stretch" h="64px">
         <Flex direction="row" align="left" flex="1" display={{ base: 'flex', md: 'none' }}>
           <IconButton
             aria-label="Ouvrir le menu"
