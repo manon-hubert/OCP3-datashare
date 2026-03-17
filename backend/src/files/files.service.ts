@@ -56,7 +56,9 @@ export class FilesService {
 
     await this.filesRepository.save(fileEntity);
 
-    const storagePath = userId ? `users/${userId}/${fileEntity.id}` : `anonymous/${fileEntity.id}`;
+    const storagePath = userId
+      ? `users/${userId}/${fileEntity.id}`
+      : `anonymous/${fileEntity.id}`;
     try {
       await this.storageService.save(storagePath, file.buffer);
     } catch (err) {
@@ -69,8 +71,15 @@ export class FilesService {
 
   async getInfoByToken(
     token: string,
-  ): Promise<Pick<FileEntity, 'originalName' | 'mimeType' | 'size' | 'createdAt' | 'expiresAt'>> {
-    const file = await this.filesRepository.findOne({ where: { downloadToken: token } });
+  ): Promise<
+    Pick<
+      FileEntity,
+      'originalName' | 'mimeType' | 'size' | 'createdAt' | 'expiresAt'
+    >
+  > {
+    const file = await this.filesRepository.findOne({
+      where: { downloadToken: token },
+    });
     if (!file) {
       throw new NotFoundException({
         code: ErrorCode.FILE_NOT_FOUND,
@@ -92,7 +101,12 @@ export class FilesService {
     };
   }
 
-  async listUserFiles(userId: number, filter: FileFilter, page: number, limit: number) {
+  async listUserFiles(
+    userId: number,
+    filter: FileFilter,
+    page: number,
+    limit: number,
+  ) {
     const now = new Date();
 
     const qb = this.filesRepository
@@ -103,9 +117,13 @@ export class FilesService {
       .take(limit);
 
     if (filter === FileFilter.ACTIVE) {
-      qb.andWhere('file.expiresAt > :now', { now });
+      const startOfToday = new Date(now);
+      startOfToday.setHours(0, 0, 0, 0);
+      qb.andWhere('file.expiresAt >= :startOfToday', { startOfToday });
     } else if (filter === FileFilter.EXPIRED) {
-      qb.andWhere('file.expiresAt <= :now', { now });
+      const startOfToday = new Date(now);
+      startOfToday.setHours(0, 0, 0, 0);
+      qb.andWhere('file.expiresAt < :startOfToday', { startOfToday });
     }
 
     const [files, total] = await qb.getManyAndCount();
@@ -144,7 +162,9 @@ export class FilesService {
   }
 
   async deleteFile(file: FileEntity): Promise<void> {
-    const storagePath = file.userId ? `users/${file.userId}/${file.id}` : `anonymous/${file.id}`;
+    const storagePath = file.userId
+      ? `users/${file.userId}/${file.id}`
+      : `anonymous/${file.id}`;
     try {
       await this.storageService.delete(storagePath);
     } catch {
@@ -168,7 +188,9 @@ export class FilesService {
   async getBufferByToken(
     token: string,
   ): Promise<{ buffer: Buffer; originalName: string; mimeType: string }> {
-    const file = await this.filesRepository.findOne({ where: { downloadToken: token } });
+    const file = await this.filesRepository.findOne({
+      where: { downloadToken: token },
+    });
     if (!file) {
       throw new NotFoundException({
         code: ErrorCode.FILE_NOT_FOUND,
@@ -181,7 +203,9 @@ export class FilesService {
         message: ErrorMessage[ErrorCode.FILE_GONE],
       });
     }
-    const storagePath = file.userId ? `users/${file.userId}/${file.id}` : `anonymous/${file.id}`;
+    const storagePath = file.userId
+      ? `users/${file.userId}/${file.id}`
+      : `anonymous/${file.id}`;
     let buffer: Buffer;
     try {
       buffer = await this.storageService.read(storagePath);
