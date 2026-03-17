@@ -12,8 +12,6 @@ const CloudUploadButton = ({ onClick }: { onClick?: () => void }) => {
       display="flex"
       alignItems="center"
       justifyContent="center"
-      cursor="pointer"
-      onClick={onClick}
     >
       <Box
         borderRadius="full"
@@ -24,7 +22,19 @@ const CloudUploadButton = ({ onClick }: { onClick?: () => void }) => {
         alignItems="center"
         justifyContent="center"
       >
-        <CloudUpload size={48} color={cloudUploadIcon} strokeWidth={2} />
+        <button
+          aria-label="Sélectionner un fichier à envoyer"
+          onClick={onClick}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            cursor: 'pointer',
+            display: 'flex',
+          }}
+        >
+          <CloudUpload size={48} color={cloudUploadIcon} strokeWidth={2} />
+        </button>
       </Box>
     </Box>
   );

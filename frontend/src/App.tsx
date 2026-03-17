@@ -15,7 +15,16 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Suspense fallback={<Spinner size="xl" color="orange.500" />}>
+        <Suspense
+          fallback={
+            <Spinner
+              size="xl"
+              color="orange.500"
+              role="status"
+              aria-label="Chargement…"
+            />
+          }
+        >
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<HomePage />} />

@@ -154,7 +154,13 @@ function MyFilesPage() {
       )}
 
       {loading ? (
-        <Spinner size="xl" color="orange.500" borderWidth="4px" />
+        <Spinner
+          size="xl"
+          color="orange.500"
+          borderWidth="4px"
+          role="status"
+          aria-label="Chargement des fichiers…"
+        />
       ) : isEmpty ? (
         <Text textStyle="small" color="{colors.fileRow.text}">
           Aucun fichier à afficher.

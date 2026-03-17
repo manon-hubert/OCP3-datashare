@@ -17,13 +17,20 @@ const DownloadPage = () => {
   }, [token]);
 
   return (
-    <Flex as="main" flex="1" align="center" justify="center" px="4" width="100%">
+    <Flex
+      as="main"
+      flex="1"
+      align="center"
+      justify="center"
+      px="4"
+      width="100%"
+    >
       {notFound ? (
         <DownloadCard token={token ?? ''} />
       ) : fileInfo ? (
         <DownloadCard fileInfo={fileInfo} token={token!} />
       ) : (
-        <Spinner />
+        <Spinner role="status" aria-label="Chargement du fichier…" />
       )}
     </Flex>
   );

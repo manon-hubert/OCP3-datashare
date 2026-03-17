@@ -48,7 +48,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
           <X strokeWidth={3} />
         </IconButton>
         <Heading
-          as="h1"
+          as="p"
           textStyle="h1"
           color="white"
           alignSelf={{ base: 'auto', md: 'stretch' }}
