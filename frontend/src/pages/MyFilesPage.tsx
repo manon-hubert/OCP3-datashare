@@ -43,7 +43,10 @@ function MyFilesPage() {
     setFiles([]);
     setHistory([]);
     if (tab === 'all') {
-      Promise.all([listFiles('all', page, PAGE_SIZE), listFileHistory(page, PAGE_SIZE)])
+      Promise.all([
+        listFiles('all', page, PAGE_SIZE),
+        listFileHistory(page, PAGE_SIZE),
+      ])
         .then(([f, h]) => {
           setFiles(f.data);
           setFilesTotal(f.total);
@@ -53,7 +56,10 @@ function MyFilesPage() {
         .catch(() => setError('Impossible de charger les fichiers.'))
         .finally(() => setLoading(false));
     } else if (tab === 'expired') {
-      Promise.all([listFiles('expired', page, PAGE_SIZE), listFileHistory(page, PAGE_SIZE)])
+      Promise.all([
+        listFiles('expired', page, PAGE_SIZE),
+        listFileHistory(page, PAGE_SIZE),
+      ])
         .then(([f, h]) => {
           setFiles(f.data);
           setFilesTotal(f.total);
@@ -88,7 +94,8 @@ function MyFilesPage() {
     }
   }
 
-  const total = tab === 'active' ? filesTotal : Math.max(filesTotal, historyTotal);
+  const total =
+    tab === 'active' ? filesTotal : Math.max(filesTotal, historyTotal);
 
   const isEmpty =
     tab === 'all'
@@ -98,6 +105,9 @@ function MyFilesPage() {
         : files.length === 0;
 
   const navigate = useNavigate();
+
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
 
   return (
     <Box>
@@ -117,7 +127,9 @@ function MyFilesPage() {
 
       <Tabs.Root
         value={tab}
-        onValueChange={(e: { value: string }) => handleTabChange(e.value as Tab)}
+        onValueChange={(e: { value: string }) =>
+          handleTabChange(e.value as Tab)
+        }
         variant="enclosed"
         mb="6"
       >
@@ -149,11 +161,22 @@ function MyFilesPage() {
         </Text>
       ) : (
         <Flex direction="column" gap="3">
-          {files.map((file) => (
-            <FileRow key={file.id} kind="active" file={file} onDelete={handleDelete} />
-          ))}
+          {files.map((file) =>
+            new Date(file.expiresAt) < startOfToday ? (
+              <FileRow key={file.id} kind="expired" file={file} />
+            ) : (
+              <FileRow
+                key={file.id}
+                kind="active"
+                file={file}
+                onDelete={handleDelete}
+              />
+            ),
+          )}
           {tab !== 'active' &&
-            history.map((item) => <FileRow key={item.id} kind="history" item={item} />)}
+            history.map((item) => (
+              <FileRow key={item.id} kind="history" item={item} />
+            ))}
         </Flex>
       )}
 
@@ -171,7 +194,11 @@ function MyFilesPage() {
                 <LuChevronLeft />
               </IconButton>
             </Pagination.PrevTrigger>
-            <Pagination.PageText format="short" textStyle="small" color="black" />
+            <Pagination.PageText
+              format="short"
+              textStyle="small"
+              color="black"
+            />
             <Pagination.NextTrigger asChild>
               <IconButton aria-label="Page suivante">
                 <LuChevronRight />

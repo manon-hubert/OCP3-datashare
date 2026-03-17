@@ -1,17 +1,35 @@
-import { Box, Button, Flex, IconButton, Menu, Portal, Text } from '@chakra-ui/react';
-import { File as FileIcon, Trash2, ArrowRight, MoreVertical } from 'lucide-react';
+import {
+  Box,
+  Button,
+  Flex,
+  IconButton,
+  Menu,
+  Portal,
+  Text,
+} from '@chakra-ui/react';
+import {
+  File as FileIcon,
+  Trash2,
+  ArrowRight,
+  MoreVertical,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { FileListItem, FileHistoryItem } from '../../api/files';
 import { formatExpiry } from '../../utils/formatExpiry';
 
 export type FileRowProps =
   | { kind: 'active'; file: FileListItem; onDelete: (id: string) => void }
+  | { kind: 'expired'; file: FileListItem }
   | { kind: 'history'; item: FileHistoryItem };
 
 export function FileRow(props: FileRowProps) {
-  const name = props.kind === 'active' ? props.file.originalName : props.item.originalName;
-  const subtitle = props.kind === 'active' ? formatExpiry(props.file.expiresAt) : `Expiré`;
-  const deleted = props.kind === 'history';
+  const name =
+    props.kind === 'history'
+      ? props.item.originalName
+      : props.file.originalName;
+  const subtitle =
+    props.kind === 'active' ? formatExpiry(props.file.expiresAt) : 'Expiré';
+  const deleted = props.kind !== 'active';
 
   return (
     <Flex
@@ -41,20 +59,31 @@ export function FileRow(props: FileRowProps) {
         </Text>
         <Text
           textStyle="small"
-          color={deleted ? '{colors.fileRow.expiredText}' : '{colors.fileRow.text}'}
+          color={
+            deleted ? '{colors.fileRow.expiredText}' : '{colors.fileRow.text}'
+          }
         >
           {subtitle}
         </Text>
       </Box>
 
       {deleted ? (
-        <Text textStyle="small" color="{colors.fileRow.mutedText}" flexShrink={0}>
+        <Text
+          textStyle="small"
+          color="{colors.fileRow.mutedText}"
+          flexShrink={0}
+        >
           Ce fichier a expiré, il n&apos;est plus stocké chez nous
         </Text>
       ) : (
         <>
           {/* Desktop buttons */}
-          <Flex align="center" gap="3" flexShrink={0} display={{ base: 'none', md: 'flex' }}>
+          <Flex
+            align="center"
+            gap="3"
+            flexShrink={0}
+            display={{ base: 'none', md: 'flex' }}
+          >
             <Button
               variant="outline"
               size="sm"
@@ -103,14 +132,22 @@ export function FileRow(props: FileRowProps) {
                     value="access"
                     asChild
                     color="black"
-                    _highlighted={{ bg: '{colors.dashboard.header.bg}', borderRadius: '8px' }}
+                    _highlighted={{
+                      bg: '{colors.dashboard.header.bg}',
+                      borderRadius: '8px',
+                    }}
                   >
-                    <Link to={`/share/${props.file.downloadToken}`}>Accéder</Link>
+                    <Link to={`/share/${props.file.downloadToken}`}>
+                      Accéder
+                    </Link>
                   </Menu.Item>
                   <Menu.Item
                     value="delete"
                     color="{colors.fileRow.expiredText}"
-                    _highlighted={{ bg: '{colors.dashboard.header.bg}', borderRadius: '8px' }}
+                    _highlighted={{
+                      bg: '{colors.dashboard.header.bg}',
+                      borderRadius: '8px',
+                    }}
                     onClick={() => props.onDelete(props.file.id)}
                   >
                     Supprimer

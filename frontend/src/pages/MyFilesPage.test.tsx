@@ -12,7 +12,7 @@ const mockFiles: filesApi.FileListItem[] = [
     id: '1',
     originalName: 'photo.jpg',
     size: 1024,
-    expiresAt: '2025-01-01T00:00:00',
+    expiresAt: '2099-01-01T00:00:00',
     downloadToken: 'token-abc',
     mimeType: 'image/jpeg',
     createdAt: '2024-01-01T00:00:00',
@@ -21,7 +21,7 @@ const mockFiles: filesApi.FileListItem[] = [
     id: '2',
     originalName: 'doc.pdf',
     size: 2048,
-    expiresAt: '2025-01-01T00:00:00',
+    expiresAt: '2099-01-01T00:00:00',
     downloadToken: 'token-def',
     mimeType: 'application/pdf',
     createdAt: '2024-01-01T00:00:00',
@@ -58,7 +58,9 @@ describe('MyFilesPage', () => {
   it('calls listFiles("active") and displays files on initial load', async () => {
     renderWithProviders(<MyFilesPage />);
 
-    await waitFor(() => expect(screen.getByText('photo.jpg')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('photo.jpg')).toBeInTheDocument(),
+    );
     expect(screen.getByText('doc.pdf')).toBeInTheDocument();
     expect(filesApi.listFiles).toHaveBeenCalledWith('active', 1, 20);
     expect(filesApi.listFileHistory).not.toHaveBeenCalled();
@@ -100,19 +102,25 @@ describe('MyFilesPage', () => {
 
     await user.click(screen.getAllByText('Supprimer')[0]);
 
-    await waitFor(() => expect(screen.queryByText('photo.jpg')).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.queryByText('photo.jpg')).not.toBeInTheDocument(),
+    );
     expect(screen.getByText('doc.pdf')).toBeInTheDocument();
   });
 
   it('shows the API error message when delete fails', async () => {
-    vi.mocked(filesApi.deleteFile).mockRejectedValue({ error: { message: 'Accès refusé' } });
+    vi.mocked(filesApi.deleteFile).mockRejectedValue({
+      error: { message: 'Accès refusé' },
+    });
     const user = userEvent.setup();
     renderWithProviders(<MyFilesPage />);
     await waitFor(() => screen.getByText('photo.jpg'));
 
     await user.click(screen.getAllByText('Supprimer')[0]);
 
-    await waitFor(() => expect(screen.getByText('Accès refusé')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('Accès refusé')).toBeInTheDocument(),
+    );
   });
 
   it('calls listFiles with page 2 when page changes', async () => {
@@ -128,7 +136,9 @@ describe('MyFilesPage', () => {
 
     await user.click(screen.getByRole('button', { name: /page suivante/i }));
 
-    await waitFor(() => expect(filesApi.listFiles).toHaveBeenCalledWith('active', 2, 20));
+    await waitFor(() =>
+      expect(filesApi.listFiles).toHaveBeenCalledWith('active', 2, 20),
+    );
   });
 
   it('resets to page 1 when switching tabs', async () => {
@@ -143,18 +153,29 @@ describe('MyFilesPage', () => {
     await waitFor(() => screen.getByText('photo.jpg'));
 
     await user.click(screen.getByRole('button', { name: /page suivante/i }));
-    await waitFor(() => expect(filesApi.listFiles).toHaveBeenCalledWith('active', 2, 20));
+    await waitFor(() =>
+      expect(filesApi.listFiles).toHaveBeenCalledWith('active', 2, 20),
+    );
 
     await user.click(screen.getByRole('tab', { name: 'Tous' }));
 
-    await waitFor(() => expect(filesApi.listFiles).toHaveBeenCalledWith('all', 1, 20));
+    await waitFor(() =>
+      expect(filesApi.listFiles).toHaveBeenCalledWith('all', 1, 20),
+    );
   });
 
   it('shows an empty state when there are no files', async () => {
-    vi.mocked(filesApi.listFiles).mockResolvedValue({ data: [], total: 0, page: 1, limit: 20 });
+    vi.mocked(filesApi.listFiles).mockResolvedValue({
+      data: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+    });
     renderWithProviders(<MyFilesPage />);
 
-    await waitFor(() => expect(screen.getByText('Aucun fichier à afficher.')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('Aucun fichier à afficher.')).toBeInTheDocument(),
+    );
   });
 
   it('shows an error banner when loading fails', async () => {
@@ -162,7 +183,9 @@ describe('MyFilesPage', () => {
     renderWithProviders(<MyFilesPage />);
 
     await waitFor(() =>
-      expect(screen.getByText('Impossible de charger les fichiers.')).toBeInTheDocument(),
+      expect(
+        screen.getByText('Impossible de charger les fichiers.'),
+      ).toBeInTheDocument(),
     );
   });
 });
